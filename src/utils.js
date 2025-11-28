@@ -181,10 +181,25 @@ export async function directoryExists(dirPath) {
  */
 export function validateTemplate(template) {
   const validTemplates = ['basic', 'instance', 'typescript', 'empty'];
-  if (!validTemplates.includes(template)) {
-    return `Invalid template "${template}". Valid templates: ${validTemplates.join(', ')}`;
+
+  // Allow built-in templates
+  if (validTemplates.includes(template)) return null;
+
+  // Allow remote templates specified as GitHub shorthand (user/repo or user/repo/path)
+  // or as full URLs (https://github.com/user/repo.git, etc.)
+  try {
+    if (typeof template === 'string') {
+      // Full URL
+      if (/^https?:\/\//.test(template)) return null;
+
+      // GitHub shorthand (user/repo or user/repo/subdir) contains a slash
+      if (/^[^\s]+\/[^^\s]+/.test(template)) return null;
+    }
+  } catch (e) {
+    // fall through to error
   }
-  return null;
+
+  return `Invalid template "${template}". Valid templates: ${validTemplates.join(', ')} or a GitHub repository (user/repo or URL)`;
 }
 
 /**

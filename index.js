@@ -18,6 +18,56 @@ import { injectP5Script } from './src/template.js';
 import { createConfig, configExists } from './src/config.js';
 import { update } from './src/update.js';
 import { initGit, addLibToGitignore } from './src/git.js';
+import degit from 'degit';
+
+
+function isRemoteTemplateSpec(t) {
+  if (!t || typeof t !== 'string') return false;
+  // Full URL
+  if (/^https?:\/\//.test(t)) return true;
+  // GitHub shorthand: user/repo or user/repo/subdir or user/repo#branch
+  if (/^[^\s]+\/[^^\s]+/.test(t)) return true;
+  return false;
+}
+
+
+function normalizeTemplateSpec(t) {
+  // If it's already a degit-style spec (contains # or / after user/repo), return as-is
+  if (!t || typeof t !== 'string') return t;
+
+  // If it's a full URL, try to convert common GitHub URLs to degit spec
+  if (/^https?:\/\//.test(t)) {
+    try {
+      const u = new URL(t);
+      // Only handle github.com URLs specially; otherwise return full URL (degit accepts github shorthand)
+      if (u.hostname.includes('github.com')) {
+        const parts = u.pathname.split('/').filter(Boolean);
+        if (parts.length >= 2) {
+          const user = parts[0];
+          let repo = parts[1];
+          repo = repo.replace(/\.git$/, '');
+
+          // Handle URLs like /user/repo/tree/branch/path
+          if (parts[2] === 'tree' && parts[3]) {
+            const branch = parts[3];
+            const subpath = parts.slice(4).join('/');
+            let spec = `${user}/${repo}`;
+            if (subpath) spec += `/${subpath}`;
+            spec += `#${branch}`;
+            return spec;
+          }
+
+          // Handle direct repo URLs
+          return `${user}/${repo}`;
+        }
+      }
+    } catch (e) {
+      // fall through
+    }
+  }
+
+  return t;
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -196,18 +246,37 @@ EXAMPLES:
       console.log('');
     }
 
-    // Set up paths based on selected template
-    const templatePath = path.join(__dirname, 'templates', selectedTemplate);
-
-    // Copy template files
+    // Copy or fetch template files (local built-in templates or remote templates)
     const copySpinner = p.spinner();
-    copySpinner.start('Copying template files');
-    if (args.verbose) {
-      console.log(`  Template path: ${templatePath}`);
-      console.log(`  Target path: ${targetPath}`);
+    if (isRemoteTemplateSpec(selectedTemplate)) {
+      copySpinner.start('Fetching remote template');
+      const spec = normalizeTemplateSpec(selectedTemplate);
+      if (args.verbose) {
+        console.log(`  Remote template spec: ${spec}`);
+        console.log(`  Target path: ${targetPath}`);
+      }
+
+      try {
+        const emitter = degit(spec, { cache: false, force: true, verbose: !!args.verbose });
+        await emitter.clone(targetPath);
+        copySpinner.stop(green('✓') + ' Fetched remote template');
+      } catch (err) {
+        copySpinner.stop(red('✗') + ' Failed to fetch remote template');
+        throw new Error(`Failed to fetch remote template "${selectedTemplate}": ${err.message}`);
+      }
+    } else {
+      // Set up paths based on selected template
+      const templatePath = path.join(__dirname, 'templates', selectedTemplate);
+
+      // Copy template files
+      copySpinner.start('Copying template files');
+      if (args.verbose) {
+        console.log(`  Template path: ${templatePath}`);
+        console.log(`  Target path: ${targetPath}`);
+      }
+      await copyTemplateFiles(templatePath, targetPath);
+      copySpinner.stop(green('✓') + ' Copied template files');
     }
-    await copyTemplateFiles(templatePath, targetPath);
-    copySpinner.stop(green('✓') + ' Copied template files');
 
     // Initialize git repository if requested (do this before other file operations)
     if (args.git) {
