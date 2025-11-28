@@ -134,6 +134,8 @@ Format: `type: short description` where type is `feat`, `fix`, `refactor`, `docs
 ### Checkpoints
 After each stage, ensure something is demo-able and working before proceeding. STOP at checkpoints for approval.
 
+After approval, save the checkpoint summary in `docs/CHECKPOINTS.md`.
+
 ## Code Documentation Standards
 
 **All functions and methods MUST have JSDoc comments** with:
