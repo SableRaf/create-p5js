@@ -25,7 +25,7 @@ const __dirname = path.dirname(__filename);
 async function main() {
   // Parse command line arguments
   const args = minimist(process.argv.slice(2), {
-    boolean: ['yes', 'git', 'no-types', 'help'],
+    boolean: ['yes', 'git', 'no-types', 'help', 'verbose'],
     string: ['template', 'version', 'mode'],
     alias: {
       y: 'yes',
@@ -56,6 +56,7 @@ OPTIONS:
   -g, --git                Initialize git repository
   -y, --yes                Skip prompts and use defaults
       --no-types           Skip TypeScript definitions download
+      --verbose            Show detailed logging
   -h, --help               Show this help message
 
 EXAMPLES:
@@ -102,6 +103,10 @@ EXAMPLES:
 
   p.intro(cyan('create-p5'));
   console.log(`Creating project: ${blue(projectName)}`);
+
+  if (args.verbose) {
+    console.log(`${blue('Verbose mode enabled')}`);
+  }
 
   try {
     // Fetch available p5.js versions
@@ -190,6 +195,10 @@ EXAMPLES:
     // Copy template files
     const copySpinner = p.spinner();
     copySpinner.start('Copying template files');
+    if (args.verbose) {
+      console.log(`  Template path: ${templatePath}`);
+      console.log(`  Target path: ${targetPath}`);
+    }
     await copyTemplateFiles(templatePath, targetPath);
     copySpinner.stop(green('✓') + ' Copied template files');
 
@@ -256,27 +265,78 @@ EXAMPLES:
       typeDefsVersion
     });
 
-    console.log(`✓ Project created successfully!`);
-    console.log(`  p5.js version: ${selectedVersion}`);
-    console.log(`  Template: ${selectedTemplate}`);
-    console.log(`  Mode: ${selectedMode}`);
-    console.log(`  TypeScript definitions: ${typeDefsVersion}`);
-    console.log(`  Config: p5-config.json created`);
-    console.log(`\nNext steps:`);
-    console.log(`  cd ${projectName}`);
-    console.log(`  Open index.html in your browser`);
+    // Success summary
+    p.outro(green('✓') + ' Project created successfully!');
+
+    console.log('\n' + cyan('Project Summary:'));
+    console.log(`  ${blue('Name:')}        ${projectName}`);
+    console.log(`  ${blue('Template:')}    ${selectedTemplate}`);
+    console.log(`  ${blue('p5.js:')}       ${selectedVersion}`);
+    console.log(`  ${blue('Mode:')}        ${selectedMode}`);
+    if (typeDefsVersion) {
+      console.log(`  ${blue('Types:')}       ${typeDefsVersion}`);
+    }
+    if (args.git) {
+      console.log(`  ${blue('Git:')}         initialized`);
+    }
+
+    console.log('\n' + cyan('Next steps:'));
+    console.log(`  ${green('1.')} cd ${projectName}`);
+    console.log(`  ${green('2.')} Open ${blue('index.html')} in your browser`);
+
+    // Add template-specific tips
+    if (selectedTemplate === 'typescript') {
+      console.log('\n' + cyan('TypeScript tips:'));
+      console.log(`  • Use a TypeScript-aware editor like VS Code`);
+      console.log(`  • Install TypeScript: ${blue('npm install -g typescript')}`);
+      console.log(`  • Compile: ${blue('tsc sketch.ts')}`);
+    }
+
+    if (selectedTemplate === 'instance') {
+      console.log('\n' + cyan('Instance mode tips:'));
+      console.log(`  • Multiple sketches can run on the same page`);
+      console.log(`  • Use ${blue('new p5(sketch, container)')} to create instances`);
+    }
+
+    if (args.git) {
+      console.log('\n' + cyan('Git tips:'));
+      console.log(`  • Make your first commit: ${blue('git add . && git commit -m "Initial commit"')}`);
+      if (selectedMode === 'local') {
+        console.log(`  • ${blue('lib/')} directory is already in .gitignore`);
+      }
+    }
+
+    console.log('\n' + cyan('Documentation:'));
+    console.log(`  • p5.js reference: ${blue('https://p5js.org/reference/')}`);
+    console.log(`  • Examples: ${blue('https://p5js.org/examples/')}`);
+    console.log(`  • Update project: ${blue('npx create-p5 update')}`);
+
+    console.log(''); // Empty line for spacing
   } catch (error) {
-    console.error('\nError creating project:', error.message);
+    p.outro(red('✗') + ' Project creation failed');
+    console.error(`\n${red('Error:')} ${error.message}`);
+
+    if (args.verbose) {
+      console.error('\nStack trace:');
+      console.error(error.stack);
+    }
 
     // Attempt to clean up the project directory if it was partially created
     try {
       if (await directoryExists(targetPath)) {
-        console.error('Cleaning up incomplete project directory...');
+        const cleanupSpinner = p.spinner();
+        cleanupSpinner.start('Cleaning up incomplete project directory');
         await fs.rm(targetPath, { recursive: true, force: true });
+        cleanupSpinner.stop(green('✓') + ' Cleaned up incomplete project');
       }
     } catch (cleanupError) {
-      console.error('Warning: Could not clean up project directory:', cleanupError.message);
+      console.error(`${red('Warning:')} Could not clean up project directory: ${cleanupError.message}`);
     }
+
+    console.error('\nIf the problem persists:');
+    console.error(`  • Try with ${blue('--verbose')} flag for detailed output`);
+    console.error(`  • Check write permissions in the current directory`);
+    console.error(`  • Report issues at ${blue('https://github.com/processing/create-p5/issues')}`);
 
     process.exit(1);
   }
