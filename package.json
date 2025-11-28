@@ -1,0 +1,27 @@
+{
+  "name": "create-p5",
+  "version": "0.1.0",
+  "description": "Scaffolding tool for p5.js projects",
+  "type": "module",
+  "bin": {
+    "create-p5": "./index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "p5",
+    "p5js",
+    "scaffolding",
+    "creative-coding",
+    "npm-create"
+  ],
+  "author": "",
+  "license": "LGPL-2.1",
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "kolorist": "^1.8.0",
+    "minimist": "^1.2.8"
+  },
+  "devDependencies": {}
+}
