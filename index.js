@@ -336,7 +336,7 @@ EXAMPLES:
     console.error('\nIf the problem persists:');
     console.error(`  • Try with ${blue('--verbose')} flag for detailed output`);
     console.error(`  • Check write permissions in the current directory`);
-    console.error(`  • Report issues at ${blue('https://github.com/processing/create-p5/issues')}`);
+    console.error(`  • Report issues at ${blue('https://github.com/sableraf/create-p5/issues')}`);
 
     process.exit(1);
   }
