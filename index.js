@@ -13,7 +13,7 @@ import { copyTemplateFiles } from './src/utils.js';
 import { fetchVersions } from './src/version.js';
 import { selectVersion } from './src/prompts.js';
 import { injectP5Script } from './src/template.js';
-import { createConfig } from './src/config.js';
+import { createConfig, configExists } from './src/config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,6 +22,16 @@ async function main() {
   // Parse command line arguments
   const args = minimist(process.argv.slice(2));
   const projectName = args._[0] || 'my-sketch';
+
+  // Check if we're in an existing p5.js project
+  const currentConfigPath = path.join(process.cwd(), 'p5-config.json');
+  if (await configExists(currentConfigPath)) {
+    console.log('Existing p5.js project detected (p5-config.json found).');
+    console.log('This directory is already a create-p5 project.');
+    console.log('\nTo update this project, use:');
+    console.log('  npx create-p5 update');
+    process.exit(0);
+  }
 
   const templatePath = path.join(__dirname, 'templates', 'basic');
   const targetPath = path.join(process.cwd(), projectName);
