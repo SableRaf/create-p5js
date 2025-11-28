@@ -647,9 +647,164 @@ Stage 7 is complete and working. Users can now:
 
 ## Stage 8: Error Handling and User Experience
 
-**Status:** PENDING
-**Goal:** Graceful error handling, validation, and polished UX
+**Status:** COMPLETE
+**Date:** 2025-11-28
 **Time:** 3-4 hours, 4 commits
+
+### Commits
+
+1. **feat: add comprehensive input validation** (`8a5247f`)
+   - Created validation functions in `src/utils.js`:
+     - `validateProjectName()` - checks npm naming conventions, no spaces, special chars, reserved names
+     - `validateTemplate()` - validates template exists (basic, instance, typescript, empty)
+     - `validateMode()` - validates delivery mode (cdn or local)
+     - `validateVersion()` - validates version against available versions list
+     - `directoryExists()` - checks if directory exists before creating
+   - Integrated validation into `index.js` for all user inputs
+   - Show specific error messages with suggestions (e.g., "Use hyphens instead of spaces")
+   - Check directory existence early to prevent overwriting
+
+2. **feat: handle network failures gracefully** (`5c877d1`)
+   - Wrapped all fetch calls in try/catch blocks with specific error messages
+   - `fetchVersions()` - detect network vs HTTP errors, provide troubleshooting steps
+   - `downloadP5Files()` - catch download failures, clean up on error
+   - `downloadTypeDefinitions()` - graceful fallback, allow project creation to continue
+   - Clean up project directory on failure (never leave broken state)
+   - Version fetch failure shows troubleshooting steps
+   - TypeScript definitions failure shows warning but continues (non-critical)
+
+3. **feat: add progress indicators and spinners** (`09c36c4`)
+   - Use `@clack/prompts.spinner()` for all long operations
+   - Color-coded messages with `kolorist`:
+     - Green (✓) for success
+     - Red (✗) for errors
+     - Blue (⚠) for warnings
+     - Cyan for section headers
+   - Added spinners for:
+     - Fetching p5.js versions
+     - Copying template files
+     - Initializing git repository
+     - Downloading p5.js files (local mode)
+     - Downloading TypeScript definitions
+   - Improved intro with `p.intro(cyan('create-p5'))`
+   - Clear visual feedback throughout scaffolding process
+
+4. **feat: improve success messaging and next steps** (`9dea8b8`)
+   - Beautiful success summary with `p.outro()`
+   - Project summary table with all configuration details
+   - Clear numbered next steps (1. cd, 2. open index.html)
+   - Template-specific tips:
+     - TypeScript: editor recommendations, tsc setup
+     - Instance mode: usage patterns
+   - Git tips when `--git` flag used
+   - Documentation links (reference, examples, update command)
+   - Added `--verbose` flag for detailed logging
+   - Enhanced error messages with troubleshooting steps
+   - Improved cleanup messaging on failures
+
+### Checkpoint Verification
+
+**Test Results:**
+- Input validation catches all invalid inputs with helpful messages
+- Project name validation rejects spaces, special chars, reserved names
+- Template/mode/version validation shows available options on error
+- Network failures handled gracefully with troubleshooting steps
+- Project directory cleaned up on any failure
+- TypeScript definitions can fail without blocking project creation
+- Spinners show progress for all long operations
+- Color-coded messages provide clear visual feedback
+- Success output includes comprehensive summary and next steps
+- Template-specific tips guide users appropriately
+- `--verbose` flag shows detailed logging for debugging
+
+**Validation Examples:**
+```bash
+# Invalid project name with spaces
+npm create p5@latest "my sketch"
+# Error: Project name cannot contain spaces. Use hyphens or underscores instead (e.g., "my-sketch")
+
+# Invalid template
+npm create p5@latest my-sketch -- --template react
+# Error: Invalid template "react". Valid templates: basic, instance, typescript, empty
+
+# Directory already exists
+npm create p5@latest my-sketch
+# Error: Directory "my-sketch" already exists.
+# Suggestion: Choose a different project name or remove the existing directory.
+```
+
+**Error Handling Examples:**
+```bash
+# Network failure during version fetch
+# ✗ Failed to fetch versions
+# Error: Unable to reach jsdelivr CDN API. Please check your internet connection and try again.
+#
+# Troubleshooting:
+#   1. Check your internet connection
+#   2. Verify that https://data.jsdelivr.com is accessible
+#   3. Try again in a few moments
+
+# Download failure during local mode
+# ✗ Failed to download p5.js files
+# Error: Unable to download p5.js files. Please check your internet connection and try again.
+# Cleaning up...
+# ✓ Cleaned up incomplete project
+```
+
+**Success Output Example:**
+```
+✓ Project created successfully!
+
+Project Summary:
+  Name:        my-sketch
+  Template:    typescript
+  p5.js:       2.1.1
+  Mode:        cdn
+  Types:       2.1.1
+  Git:         initialized
+
+Next steps:
+  1. cd my-sketch
+  2. Open index.html in your browser
+
+TypeScript tips:
+  • Use a TypeScript-aware editor like VS Code
+  • Install TypeScript: npm install -g typescript
+  • Compile: tsc sketch.ts
+
+Git tips:
+  • Make your first commit: git add . && git commit -m "Initial commit"
+
+Documentation:
+  • p5.js reference: https://p5js.org/reference/
+  • Examples: https://p5js.org/examples/
+  • Update project: npx create-p5 update
+```
+
+### Demo-able Features
+
+- All user inputs validated with helpful error messages
+- Network failures handled gracefully with retry suggestions
+- Progress spinners show visual feedback for all operations
+- Color-coded messages (green/red/blue) improve readability
+- Comprehensive success output guides users on next steps
+- Template-specific tips help users get started
+- `--verbose` flag available for troubleshooting
+- Project never left in broken state after failures
+- Cleanup happens automatically on any error
+
+### Ship It! 🚢
+
+Stage 8 is complete and working. The tool now provides:
+- Comprehensive input validation with clear error messages
+- Graceful error handling for all network operations
+- Beautiful progress indicators and spinners
+- Professional success output with contextual guidance
+- Template-specific tips and documentation links
+- Verbose logging mode for debugging
+- Automatic cleanup on failures
+
+**Ready to proceed to Stage 9: Refactoring and Code Quality**
 
 ---
 
