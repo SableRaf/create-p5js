@@ -37,18 +37,7 @@ create-p5/
 │   ├── instance/           # Instance mode for multiple sketches
 │   ├── typescript/         # TypeScript setup with type definitions
 │   └── empty/              # Minimal HTML only
-├── tests/
-└── proof_of_concept/       # Validated architectural patterns
-    └── src/
-        ├── api/
-        │   └── VersionProvider.js    # Version fetching from jsdelivr API
-        ├── config/
-        │   └── ConfigManager.js      # p5-config.json management
-        ├── file/
-        │   ├── FileManager.js        # File system operations
-        │   └── HTMLManager.js        # HTML parsing and manipulation
-        └── ui/
-            └── PromptProvider.js     # User interaction prompts
+└── tests/
 ```
 
 ## Key Dependencies
