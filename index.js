@@ -74,7 +74,12 @@ async function main() {
 
       // Update .gitignore to exclude lib/ directory in local mode
       const gitignorePath = path.join(targetPath, '.gitignore');
-      const gitignoreContent = await fs.readFile(gitignorePath, 'utf-8');
+      let gitignoreContent = '';
+      try {
+        gitignoreContent = await fs.readFile(gitignorePath, 'utf-8');
+      } catch {
+        // .gitignore doesn't exist, start with empty content
+      }
       await fs.writeFile(gitignorePath, gitignoreContent + '\n# Local p5.js files\nlib/\n', 'utf-8');
     }
 
