@@ -13,6 +13,7 @@ import { copyTemplateFiles } from './src/utils.js';
 import { fetchVersions } from './src/version.js';
 import { selectVersion } from './src/prompts.js';
 import { injectP5Script } from './src/template.js';
+import { createConfig } from './src/config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -54,8 +55,19 @@ async function main() {
     const updatedHtml = injectP5Script(htmlContent, selectedVersion);
     await fs.writeFile(indexPath, updatedHtml, 'utf-8');
 
+    // Create p5-config.json in project root
+    const configPath = path.join(targetPath, 'p5-config.json');
+    await createConfig(configPath, {
+      version: selectedVersion,
+      mode: 'cdn',
+      template: 'basic'
+    });
+
     console.log(`✓ Project created successfully!`);
     console.log(`  p5.js version: ${selectedVersion}`);
+    console.log(`  Template: basic`);
+    console.log(`  Mode: cdn`);
+    console.log(`  Config: p5-config.json created`);
     console.log(`\nNext steps:`);
     console.log(`  cd ${projectName}`);
     console.log(`  Open index.html in your browser`);
