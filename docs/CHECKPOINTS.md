@@ -542,9 +542,106 @@ Stage 6 is complete and working. Users can now:
 
 ## Stage 7: Non-Interactive Mode and Git Integration
 
-**Status:** PENDING
-**Goal:** Support CLI flags and optional git initialization
+**Status:** COMPLETE
+**Date:** 2025-11-28
 **Time:** 3-4 hours, 3 commits
+
+### Commits
+
+1. **feat: add argument parsing for all CLI options** (`9e86d41`)
+   - Support full non-interactive mode with flags
+   - Parse flags: `--template`, `--version`, `--mode`, `--git`, `--yes`, `--no-types`
+   - Add `--help` flag with usage documentation
+   - Validate template, version, and mode flags
+   - Skip prompts when flags are provided
+   - Use defaults with `--yes` flag
+
+2. **feat: implement git initialization** (`8a5c916`)
+   - Created `src/git.js` with `initGit()` function
+   - Run `git init` using `child_process.spawn`
+   - Create `.gitignore` with node_modules, .DS_Store, *.log, .env
+   - Add lib/ to `.gitignore` for local mode
+   - Only run if git is installed (detect via `git --version`)
+   - Refactor `.gitignore` handling to use `addLibToGitignore()` helper
+
+3. **feat: add --yes flag for defaults and improve config summary** (`ba9821a`)
+   - Implement `--yes` flag to skip all prompts
+   - Use defaults: latest version, basic template, cdn mode, no git
+   - Show summary of choices when using flags (unless `--yes`)
+   - Display project configuration before scaffolding
+   - Move git initialization earlier to ensure proper `.gitignore` handling
+   - Fix `--no-types` flag handling with minimist
+
+### Checkpoint Verification
+
+**Test Results:**
+- `--help` flag displays full usage documentation
+- `--template`, `--version`, `--mode` flags work correctly
+- Invalid flag values show helpful error messages
+- `--git` flag initializes repository and creates `.gitignore`
+- `--no-types` flag skips TypeScript definitions download
+- `--yes` flag uses defaults: latest version, basic template, cdn mode, no git
+- Summary displayed when using flags (unless `--yes`)
+- Git initialization works correctly with local mode
+- `.gitignore` properly includes lib/ for local mode
+- All flags can be combined freely
+
+**Usage Examples:**
+```bash
+# Interactive mode (default)
+npm create p5@latest my-sketch
+
+# Non-interactive with all flags
+npm create p5@latest my-sketch -- --template typescript --version latest --mode local --git
+
+# Fully automated with defaults
+npm create p5@latest my-sketch -- --yes
+
+# Automated with git
+npm create p5@latest my-sketch -- --yes --git
+
+# Custom setup without types
+npm create p5@latest my-sketch -- --template basic --no-types
+
+# Show help
+npm create p5@latest -- --help
+```
+
+**Flag Summary:**
+- `-t, --template` - Choose template (basic, instance, typescript, empty)
+- `-v, --version` - Choose p5.js version (e.g., "2.1.1" or "latest")
+- `-m, --mode` - Choose delivery mode (cdn or local)
+- `-g, --git` - Initialize git repository
+- `-y, --yes` - Skip all prompts and use defaults
+- `--no-types` - Skip TypeScript definitions download
+- `-h, --help` - Show usage documentation
+
+**Git Integration:**
+- Detects git availability via `git --version`
+- Creates `.gitignore` with standard entries
+- Includes lib/ in `.gitignore` for local mode
+- Works seamlessly with both interactive and non-interactive modes
+
+### Demo-able Features
+
+- Tool now supports both interactive and non-interactive modes
+- Users can fully automate project creation with flags
+- Git initialization is optional and gracefully handles missing git
+- `--yes` flag enables one-command setup with sensible defaults
+- Helpful error messages for invalid flag values
+- Summary shows configuration before proceeding (unless `--yes`)
+
+### Ship It! 🚢
+
+Stage 7 is complete and working. Users can now:
+- Use CLI flags to skip interactive prompts
+- Fully automate project creation with `--yes`
+- Initialize git repositories with `--git`
+- Customize setup with any combination of flags
+- Get help documentation with `--help`
+- Skip TypeScript definitions with `--no-types`
+
+**Ready to proceed to Stage 8: Error Handling and User Experience**
 
 ---
 
