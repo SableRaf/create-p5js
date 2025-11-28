@@ -211,9 +211,98 @@ Stage 3 is complete and working. New projects now have:
 
 ## Stage 4: Alternative Delivery Modes
 
-**Status:** PENDING
-**Goal:** Support both CDN and local p5.js files
-**Time:** 4-5 hours, 4 commits
+**Status:** COMPLETE
+**Date:** 2025-11-28
+**Time:** 2-3 hours, 4 commits
+
+### Commits
+
+1. **feat: add mode selection prompt** (`6e878ec`)
+   - Created `selectMode()` function in `src/prompts.js`
+   - Uses `@clack/prompts.select()` with CDN and local options
+   - Provides helpful hints for each mode:
+     - CDN: "Load p5.js from jsdelivr CDN (recommended for most users)"
+     - Local: "Download p5.js files to your project (works offline)"
+   - Returns selected mode string ('cdn' or 'local')
+
+2. **feat: implement local file download** (`cb1d057`)
+   - Created `downloadP5Files(version, targetDir)` in `src/version.js`
+   - Downloads both `p5.js` and `p5.min.js` from jsdelivr CDN
+   - Uses CDN URL: `https://cdn.jsdelivr.net/npm/p5@{version}/lib/p5.js`
+   - Saves files to specified target directory with UTF-8 encoding
+   - Uses native fetch API for downloads
+
+3. **feat: update HTML manipulation for modes** (`b61f811`)
+   - Updated `injectP5Script()` in `src/template.js` to accept mode parameter
+   - Mode parameter defaults to 'cdn' for backward compatibility
+   - CDN mode: Uses `https://cdn.jsdelivr.net/npm/p5@{version}/lib/p5.js`
+   - Local mode: Uses `./lib/p5.js` (relative path)
+   - Updated `index.js` to import `selectMode` and pass mode to `injectP5Script()`
+   - Config now stores the selected mode
+
+4. **feat: create lib directory for local mode** (`c7eaec8`)
+   - Added logic to create `lib/` directory when local mode is selected
+   - Downloads p5.js files to `lib/` directory after template copy
+   - Created `.gitignore` template in `templates/basic/`
+   - Automatically appends `lib/` to `.gitignore` when local mode is selected
+   - Uses `fs.mkdir()` with `{ recursive: true }` for safe directory creation
+
+### Checkpoint Verification
+
+**Test Results:**
+- Mode selection prompt displays correctly with hints
+- CDN mode creates projects with CDN script tags
+- Local mode creates `lib/` directory and downloads both p5.js files
+- Script tags correctly point to `./lib/p5.js` in local mode
+- `.gitignore` properly excludes `lib/` directory in local mode
+- Config file stores selected mode ('cdn' or 'local')
+
+**Local Mode Output:**
+```
+lib/
+├── p5.js        (full version, ~1.2MB)
+└── p5.min.js    (minified version, ~500KB)
+```
+
+**CDN Mode Script Tag:**
+```html
+<script src="https://cdn.jsdelivr.net/npm/p5@2.1.1/lib/p5.js"></script>
+```
+
+**Local Mode Script Tag:**
+```html
+<script src="./lib/p5.js"></script>
+```
+
+**Updated p5-config.json Schema:**
+```json
+{
+  "version": "2.1.1",
+  "mode": "local",
+  "template": "basic",
+  "typeDefsVersion": null,
+  "lastUpdated": "2025-11-28T15:45:12.456Z"
+}
+```
+
+### Demo-able Features
+
+- Users can now choose between CDN and local delivery modes
+- Local mode projects work completely offline
+- Both p5.js and p5.min.js are downloaded for local mode
+- .gitignore automatically configured based on mode
+- Mode is persisted in p5-config.json for future updates
+- Clear user feedback shows which mode was selected
+
+### Ship It! 🚢
+
+Stage 4 is complete and working. Users can now:
+- Choose between CDN and local p5.js delivery
+- Create offline-capable projects with local mode
+- Have proper .gitignore configuration based on mode
+- See mode information in config and success messages
+
+**Ready to proceed to Stage 5: Multiple Templates and TypeScript Support**
 
 ---
 
