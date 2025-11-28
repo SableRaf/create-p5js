@@ -15,3 +15,25 @@ export async function selectVersion(versions, latest) {
     }))
   });
 }
+
+/**
+ * Displays a delivery mode selection prompt to the user
+ * @returns {Promise<string>} The selected mode ('cdn' or 'local')
+ */
+export async function selectMode() {
+  return await p.select({
+    message: 'Select delivery mode:',
+    options: [
+      {
+        value: 'cdn',
+        label: 'CDN',
+        hint: 'Load p5.js from jsdelivr CDN (recommended for most users)'
+      },
+      {
+        value: 'local',
+        label: 'Local',
+        hint: 'Download p5.js files to your project (works offline)'
+      }
+    ]
+  });
+}
