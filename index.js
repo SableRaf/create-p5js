@@ -21,8 +21,48 @@ const __dirname = path.dirname(__filename);
 
 async function main() {
   // Parse command line arguments
-  const args = minimist(process.argv.slice(2));
+  const args = minimist(process.argv.slice(2), {
+    boolean: ['yes', 'git', 'no-types', 'help'],
+    string: ['template', 'version', 'mode'],
+    alias: {
+      y: 'yes',
+      g: 'git',
+      t: 'template',
+      v: 'version',
+      m: 'mode',
+      h: 'help'
+    }
+  });
+
   const command = args._[0];
+
+  // Handle --help flag
+  if (args.help) {
+    console.log(`
+create-p5 - Scaffolding tool for p5.js projects
+
+USAGE:
+  npm create p5@latest [project-name] [options]
+  npx create-p5 [project-name] [options]
+  npx create-p5 update
+
+OPTIONS:
+  -t, --template <name>    Template to use (basic, instance, typescript, empty)
+  -v, --version <version>  p5.js version to use (e.g., 2.1.1 or latest)
+  -m, --mode <mode>        Delivery mode (cdn or local)
+  -g, --git                Initialize git repository
+  -y, --yes                Skip prompts and use defaults
+      --no-types           Skip TypeScript definitions download
+  -h, --help               Show this help message
+
+EXAMPLES:
+  npm create p5@latest my-sketch
+  npm create p5@latest my-sketch -- --template typescript --mode cdn --git
+  npm create p5@latest -- --yes
+  npx create-p5 update
+`);
+    process.exit(0);
+  }
 
   // Handle 'update' command explicitly
   if (command === 'update') {
@@ -50,14 +90,58 @@ async function main() {
     console.log('Fetching p5.js versions...');
     const { latest, versions } = await fetchVersions();
 
-    // Prompt user to select template
-    const selectedTemplate = await selectTemplate();
+    // Determine template (flag or prompt)
+    let selectedTemplate;
+    if (args.template) {
+      const validTemplates = ['basic', 'instance', 'typescript', 'empty'];
+      if (!validTemplates.includes(args.template)) {
+        console.error(`Error: Invalid template "${args.template}". Valid templates: ${validTemplates.join(', ')}`);
+        process.exit(1);
+      }
+      selectedTemplate = args.template;
+      console.log(`Using template: ${selectedTemplate}`);
+    } else if (args.yes) {
+      selectedTemplate = 'basic';
+      console.log('Using default template: basic');
+    } else {
+      selectedTemplate = await selectTemplate();
+    }
 
-    // Prompt user to select version
-    const selectedVersion = await selectVersion(versions, latest);
+    // Determine version (flag or prompt)
+    let selectedVersion;
+    if (args.version) {
+      if (args.version === 'latest') {
+        selectedVersion = latest;
+      } else if (!versions.includes(args.version)) {
+        console.error(`Error: Version "${args.version}" not found. Use "latest" or a specific version like "2.1.1"`);
+        process.exit(1);
+      } else {
+        selectedVersion = args.version;
+      }
+      console.log(`Using p5.js version: ${selectedVersion}`);
+    } else if (args.yes) {
+      selectedVersion = latest;
+      console.log(`Using latest p5.js version: ${latest}`);
+    } else {
+      selectedVersion = await selectVersion(versions, latest);
+    }
 
-    // Prompt user to select delivery mode
-    const selectedMode = await selectMode();
+    // Determine delivery mode (flag or prompt)
+    let selectedMode;
+    if (args.mode) {
+      const validModes = ['cdn', 'local'];
+      if (!validModes.includes(args.mode)) {
+        console.error(`Error: Invalid mode "${args.mode}". Valid modes: ${validModes.join(', ')}`);
+        process.exit(1);
+      }
+      selectedMode = args.mode;
+      console.log(`Using delivery mode: ${selectedMode}`);
+    } else if (args.yes) {
+      selectedMode = 'cdn';
+      console.log('Using default delivery mode: cdn');
+    } else {
+      selectedMode = await selectMode();
+    }
 
     // Set up paths based on selected template
     const templatePath = path.join(__dirname, 'templates', selectedTemplate);
@@ -99,9 +183,14 @@ async function main() {
     await fs.writeFile(indexPath, updatedHtml, 'utf-8');
 
     // Download TypeScript definitions for IntelliSense (all templates)
-    const typesPath = path.join(targetPath, 'types');
-    await fs.mkdir(typesPath, { recursive: true });
-    const typeDefsVersion = await downloadTypeDefinitions(selectedVersion, typesPath);
+    let typeDefsVersion = null;
+    if (!args['no-types']) {
+      const typesPath = path.join(targetPath, 'types');
+      await fs.mkdir(typesPath, { recursive: true });
+      typeDefsVersion = await downloadTypeDefinitions(selectedVersion, typesPath);
+    } else {
+      console.log('Skipping TypeScript definitions download (--no-types flag)');
+    }
 
     // Create p5-config.json in project root
     const configPath = path.join(targetPath, 'p5-config.json');
