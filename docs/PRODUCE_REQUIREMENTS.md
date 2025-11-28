@@ -915,6 +915,13 @@ https://cdn.jsdelivr.net/npm/@types/p5@{version}/index.d.ts
 - **v1.1.0** - Community templates
 - **v1.2.0** - TBD
 
+### Stretch Goals (Post-MVP)
+
+- Support for loading templates from the OpenProcessing API with a sketch ID or URL (requires API access and licensing checks)
+- Support for p5 1.x and p5 2.x side by side
+- Support for additional p5.js libraries (p5.sound) in p5 1.x projects (they are built-in in p5 2.x)
+- Support for searching examples from the p5.js website and using them as templates (will need crediting and licensing checks + central registry)
+
 ---
 
 **Document Version:** 1.0  
