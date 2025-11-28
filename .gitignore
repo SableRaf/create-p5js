@@ -137,3 +137,7 @@ dist
 
 # Claude Code
 .claude/
+
+# Test artifacts
+test-*.js
+test-sketch-*/

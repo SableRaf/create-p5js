@@ -21,7 +21,7 @@
   "dependencies": {
     "@clack/prompts": "^0.7.0",
     "kolorist": "^1.8.0",
+    "linkedom": "^0.18.12",
     "minimist": "^1.2.8"
-  },
-  "devDependencies": {}
+  }
 }

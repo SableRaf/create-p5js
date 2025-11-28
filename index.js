@@ -10,6 +10,9 @@ import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
 import minimist from 'minimist';
 import { copyTemplateFiles } from './src/utils.js';
+import { fetchVersions } from './src/version.js';
+import { selectVersion } from './src/prompts.js';
+import { injectP5Script } from './src/template.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,8 +38,24 @@ async function main() {
   }
 
   try {
+    // Fetch available p5.js versions
+    console.log('Fetching p5.js versions...');
+    const { latest, versions } = await fetchVersions();
+
+    // Prompt user to select version
+    const selectedVersion = await selectVersion(versions, latest);
+
+    // Copy template files
     await copyTemplateFiles(templatePath, targetPath);
+
+    // Inject p5.js script tag into index.html
+    const indexPath = path.join(targetPath, 'index.html');
+    const htmlContent = await fs.readFile(indexPath, 'utf-8');
+    const updatedHtml = injectP5Script(htmlContent, selectedVersion);
+    await fs.writeFile(indexPath, updatedHtml, 'utf-8');
+
     console.log(`✓ Project created successfully!`);
+    console.log(`  p5.js version: ${selectedVersion}`);
     console.log(`\nNext steps:`);
     console.log(`  cd ${projectName}`);
     console.log(`  Open index.html in your browser`);
