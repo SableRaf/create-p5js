@@ -73,7 +73,7 @@ npm create p5@latest
 2. p5.js version (shows latest 15 versions, defaults to latest)
 3. Template selection (basic/instance/typescript/empty)
 4. Delivery mode (cdn/local, defaults to cdn)
-5. Initialize git? (yes/no, defaults to yes)
+5. Initialize git? (yes/no, defaults to no)
 
 #### 1.2 Non-Interactive Mode
 **Priority:** P0 (Must Have)
@@ -95,7 +95,7 @@ npm create p5@latest my-sketch -- --template basic --version 1.9.0 --mode cdn --
 - `-t, --template <name>` - Template choice
 - `-v, --version <version>` - p5.js version
 - `-m, --mode <cdn|local>` - Delivery mode
-- `--no-git` - Skip git initialization
+- `--git` - Initialize git repository
 - `--no-types` - Skip TypeScript definitions
 - `-y, --yes` - Use all defaults
 
@@ -382,12 +382,13 @@ Available p5.js versions:
 #### 9.1 Git Initialization
 **Priority:** P1 (Should Have)
 
-**User Story:** As a developer, I want my project initialized with git so I can track changes immediately.
+**User Story:** As a developer, I want the option to initialize my project with git so I can track changes.
 
 **Acceptance Criteria:**
-- Runs `git init` after scaffolding
+- Optional feature (OFF by default - better for beginners)
+- User can enable via interactive prompt or `--git` flag
+- When enabled, runs `git init` after scaffolding
 - Creates basic .gitignore with node_modules, .DS_Store
-- Optional (user can decline via prompt or `--no-git`)
 - Only runs if git is installed (silent skip if not)
 
 #### 9.2 .gitignore Template
@@ -807,7 +808,7 @@ npm create p5@latest <name> -- [options]
 -t, --template <name>     # basic, instance, typescript, empty, user/repo
 -v, --version <version>   # latest, 1.9.0, etc.
 -m, --mode <mode>         # cdn, local
---no-git                  # Skip git init
+--git                     # Initialize git repository
 --no-types                # Skip TypeScript definitions
 -y, --yes                 # Use all defaults
 
@@ -921,6 +922,7 @@ https://cdn.jsdelivr.net/npm/@types/p5@{version}/index.d.ts
 - Support for p5 1.x and p5 2.x side by side
 - Support for additional p5.js libraries (p5.sound) in p5 1.x projects (they are built-in in p5 2.x)
 - Support for searching examples from the p5.js website and using them as templates (will need crediting and licensing checks + central registry)
+- Install script to install dependencies and create a `p5` CLI command for easier access and more concise commands
 
 ---
 
