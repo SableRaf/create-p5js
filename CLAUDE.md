@@ -120,6 +120,8 @@ Follow incremental development in 6-10 stages with 2-4 atomic commits per stage:
 - **15-60 minutes** to implement
 - **One purpose**: add feature OR refactor OR fix (not multiple)
 - **Leaves code working** - must be testable after commit
+- **Descriptive message** - concise but informative
+- **Renaming/moving files/folders MUST be a separate commit** - never combined with other changes.
 
 Format: `type: short description` where type is `feat`, `fix`, `refactor`, `docs`, `test`, or `style`
 

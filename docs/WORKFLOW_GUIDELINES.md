@@ -71,6 +71,8 @@ Stage 8: Documentation - README, examples
 - **15-60 minutes** to implement
 - **One purpose**: add feature OR refactor OR fix (not multiple)
 - **Leaves code working** - must be testable after commit
+- **Descriptive message** - clear what, why, how. Concise but informative.
+- **Renaming/moving files/folders MUST be a separate commit** - never combined with other changes.
 
 ### Format
 
@@ -178,6 +180,12 @@ Every plan should include:
 
 ### 5. Don't Add While Refactoring
 [Maintain discipline]
+
+### 6. Renaming and Moving Files
+[How to handle safely]
+
+### 7. Document as You Go
+[When and what to document]
 ```
 
 ---
@@ -195,6 +203,7 @@ Include 4-6 project-specific warnings:
 🚩 **No demo after 5 commits** → Increments too small or broken
 🚩 **Refactoring in Stage 2** → Too early, features first
 🚩 **Skipping tests "temporarily"** → Technical debt starts
+🚩 **Renaming or moving files without a separate commit** → Hard to review and track history
 ```
 
 ---
