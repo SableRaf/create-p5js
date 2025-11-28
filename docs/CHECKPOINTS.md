@@ -145,9 +145,67 @@ Stage 2 is complete and working. Users can now:
 
 ## Stage 3: Project Configuration Persistence
 
-**Status:** PENDING
-**Goal:** Save project metadata to p5-config.json
+**Status:** COMPLETE
+**Date:** 2025-11-28
 **Time:** 2-3 hours, 3 commits
+
+### Commits
+
+1. **feat: create ConfigManager module** (`e96e6c1`)
+   - Created `src/config.js` with config management functions
+   - Implemented `createConfig()` to write new p5-config.json
+   - Implemented `readConfig()` to parse existing config
+   - Implemented `configExists()` to check for existing projects
+   - Uses proper JSON formatting with 2-space indent
+
+2. **feat: save config during scaffolding** (`5cb90b5`)
+   - Create p5-config.json in project root during scaffolding
+   - Save version, mode (hardcoded "cdn"), and template name
+   - Store timestamp in lastUpdated field
+   - Update success message to show config creation
+
+3. **feat: detect existing projects** (`725cca2`)
+   - Check for p5-config.json in current directory before scaffolding
+   - Show helpful message if project already exists
+   - Prevent re-scaffolding over existing projects
+   - Exit gracefully with update command suggestion
+
+### Checkpoint Verification
+
+**Test Results:**
+- Config file created with correct structure
+- Config contains: version, mode, template, typeDefsVersion, lastUpdated
+- All fields properly formatted with 2-space JSON indent
+- Existing project detection works correctly
+- Helpful message shown when running in existing project directory
+
+**p5-config.json Schema:**
+```json
+{
+  "version": "2.1.1",
+  "mode": "cdn",
+  "template": "basic",
+  "typeDefsVersion": null,
+  "lastUpdated": "2025-11-28T12:32:25.673Z"
+}
+```
+
+### Demo-able Features
+
+- Running the CLI now creates p5-config.json in every new project
+- Config file stores metadata for future update operations
+- Running CLI in existing project directory shows helpful message
+- Users are directed to use `npx create-p5 update` for existing projects
+
+### Ship It! 🚢
+
+Stage 3 is complete and working. New projects now have:
+- Persistent configuration in p5-config.json
+- Metadata for version, mode, template, and timestamps
+- Protection against re-scaffolding existing projects
+- Clear guidance for update workflow
+
+**Ready to proceed to Stage 4: Alternative Delivery Modes**
 
 ---
 
