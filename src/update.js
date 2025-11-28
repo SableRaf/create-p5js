@@ -25,15 +25,18 @@ export async function update(projectDir = process.cwd()) {
   if (!config) {
     console.error('Error: No p5-config.json found. This does not appear to be a create-p5 project.');
     process.exit(1);
+    return; // defensive: ensure function doesn't continue if exit is mocked
   }
 
   // Display current project state
-  console.log('Current project configuration:');
-  console.log(`  p5.js version: ${config.version}`);
-  console.log(`  Delivery mode: ${config.mode}`);
-  console.log(`  Template: ${config.template}`);
-  console.log(`  TypeScript definitions: ${config.typeDefsVersion || 'none'}`);
-  console.log(`  Last updated: ${config.lastUpdated}`);
+  if (config) {
+    console.log('Current project configuration:');
+    console.log(`  p5.js version: ${config.version}`);
+    console.log(`  Delivery mode: ${config.mode}`);
+    console.log(`  Template: ${config.template}`);
+    console.log(`  TypeScript definitions: ${config.typeDefsVersion || 'none'}`);
+    console.log(`  Last updated: ${config.lastUpdated}`);
+  }
 
   // Show update options
   const action = await p.select({

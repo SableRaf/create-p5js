@@ -7,17 +7,36 @@ const P5_PATTERNS = [
   /^\.?\/?\blib\/p5(?:@([^/]+))?\.(min\.)?js$/
 ];
 
+/**
+ * HTMLManager - Parses and manipulates an HTML document string using linkedom.
+ * Responsibilities:
+ * - Parse HTML into a DOM
+ * - Find existing p5.js script tags and detect CDN/provider and minification
+ * - Insert or replace a p5.js script tag preserving user preferences
+ */
 class HTMLManager {
+  /**
+   * Create an HTMLManager instance from an HTML string
+   * @param {string} htmlString - Raw HTML document string to parse
+   */
   constructor(htmlString) {
     const { document } = parseHTML(htmlString);
     this.document = document;
   }
 
+  /**
+   * Serialize the DOM back to an HTML string with a DOCTYPE
+   * @returns {string} The serialized HTML document
+   */
   serialize() {
     const doctype = '<!DOCTYPE html>\n';
     return doctype + this.document.documentElement.outerHTML;
   }
 
+  /**
+   * Find an existing p5.js script tag in the document
+   * @returns {{scriptNode: Element, version: string, isMinified: boolean, cdnProvider: string}|null}
+   */
   findP5Script() {
     const scripts = this.document.querySelectorAll('script');
 
@@ -40,6 +59,18 @@ class HTMLManager {
     return null;
   }
 
+  /**
+   * Update (or insert) the p5.js script tag for the given version and mode.
+   * Strategy:
+   * 1. Update existing p5 script tag if found
+   * 2. Replace marker comment `<!-- P5JS_SCRIPT_TAG -->` if present
+   * 3. Insert script into <head>
+   *
+   * @param {string} version - p5.js version to reference
+   * @param {string} [mode='cdn'] - Delivery mode: 'cdn' or 'local'
+   * @param {Object} [preferences={}] - Optional preferences: { isMinified: boolean, cdnProvider: string }
+   * @returns {boolean} True if the document was modified, false otherwise
+   */
   updateP5Script(version, mode = 'cdn', preferences = {}) {
     // Try update existing script
     const p5Info = this.findP5Script();

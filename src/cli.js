@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /**
  * CLI module - Routes between scaffold and update workflows
  */

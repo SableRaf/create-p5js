@@ -18,10 +18,20 @@
   ],
   "author": "",
   "license": "LGPL-2.1",
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest --coverage --run"
+  },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
     "kolorist": "^1.8.0",
     "linkedom": "^0.18.12",
     "minimist": "^1.2.8"
   }
+  ,
+  "devDependencies": {
+    "vitest": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0"
+  }
+
 }

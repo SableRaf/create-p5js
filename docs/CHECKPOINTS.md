@@ -859,9 +859,46 @@ Stage 9 refactor is complete. The codebase is more maintainable and prepared for
 
 ## Stage 10: Documentation and Testing
 
-**Status:** PENDING
-**Goal:** Complete documentation and automated tests
-**Time:** 4-5 hours, 3 commits
+**Status:** IN PROGRESS
+**Date:** 2025-11-28
+**Goal:** Complete documentation and automated tests (achieve >80% coverage for core modules)
+**Time:** 4-5 hours estimated; work in progress across multiple small commits
+
+### Work completed so far
+- **JSDoc:** Added comprehensive JSDoc comments to core modules (`src/template.js` and others updated). 
+- **Testing framework:** Added `vitest` to `devDependencies` and `test`/`test:coverage` scripts to `package.json`.
+- **Unit tests:** Added a test suite under `tests/` covering:
+   - `version.test.js`, `version.types.test.js`, `version.download.test.js` (version provider)
+   - `config.test.js` (config manager)
+   - `template.test.js`, `template-advanced.test.js` (HTMLManager / template injection)
+   - `utils.test.js` (validation and utils)
+   - `cli.test.js`, `git.test.js`, `update.test.js` (CLI, git helpers, update workflow edge cases)
+- **Documentation:** Updated `README.md` with testing instructions.
+- **CI/Run:** Ran the full test suite locally; all tests pass (currently 18 tests across 10 files).
+
+### Test & coverage results (current)
+- Test run: all tests passed locally (18 passed).
+- Coverage (v8 report):
+   - All files (project): **32.19% statements**
+   - `create-p5/src` (core modules): **63% statements**
+   - Notable per-file coverage:
+      - Good: `cli.js` (100%), `template.js` (~90%), `version.js` (~82%), `utils.js` (~78%)
+      - Low: `update.js` (~22%), `git.js` (~44%), `prompts.js` (~33%)
+
+### Remaining work (to meet Stage 10 goal >80% coverage)
+1. Add focused unit tests for `src/update.js` to exercise the main update flows:
+    - Version update path (mock fetch/downloads, file reads/writes)
+    - Mode switching (CDN↔Local), including .gitignore handling
+    - Cancel/edge branches (user cancels)
+2. Add tests for `src/prompts.js` by mocking `@clack/prompts` to exercise `runInteractivePrompts` and individual prompt wrappers.
+3. Extend `src/git.js` tests to cover `initGit` and error paths by mocking `child_process.spawn` and filesystem interactions.
+4. Re-run coverage and iterate until `create-p5/src` statement coverage exceeds 80%.
+
+### Next steps (optionally I can proceed)
+- I can implement the tests above (priority: update flows and prompts) and re-run coverage. Estimated 2–4 hours.
+- After coverage target is reached, I'll update this checkpoint to **COMPLETE** with commit references and a short summary.
+
+If you want me to continue, tell me which tests to prioritize (I recommend `update.js` flows first). 
 
 ---
 
