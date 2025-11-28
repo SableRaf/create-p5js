@@ -308,9 +308,121 @@ Stage 4 is complete and working. Users can now:
 
 ## Stage 5: Multiple Templates and TypeScript Support
 
-**Status:** PENDING
-**Goal:** Support basic, instance, typescript, and empty templates
-**Time:** 5-6 hours, 4 commits
+**Status:** COMPLETE
+**Date:** 2025-11-28
+**Time:** 3-4 hours, 4 commits
+
+### Commits
+
+1. **feat: create additional template directories** (`86d6376`)
+   - Created `templates/instance/` with instance mode example
+   - Created `templates/typescript/` with .ts files and tsconfig.json
+   - Created `templates/empty/` with minimal HTML only
+   - Each template has proper jsconfig.json or tsconfig.json for IntelliSense
+   - Instance template shows p5.js instance mode pattern with namespaced sketch
+   - TypeScript template includes type annotations and strict compiler options
+   - Empty template provides minimal HTML for custom projects
+
+2. **feat: add template selection prompt** (`be5596a`)
+   - Added `selectTemplate()` function to `src/prompts.js`
+   - Shows template choices with descriptions:
+     - Basic: "Standard p5.js with global mode (recommended for beginners)"
+     - Instance Mode: "Multiple sketches on one page, avoids global namespace"
+     - TypeScript: "TypeScript setup with type definitions"
+     - Empty: "Minimal HTML only, build your own structure"
+   - Returns selected template name
+
+3. **feat: implement TypeScript definitions download** (`9d8539d`)
+   - Added `downloadTypeDefinitions(version, targetDir)` to `src/version.js`
+   - Downloads from `https://cdn.jsdelivr.net/npm/p5@{version}/types/global.d.ts`
+   - Saves to `types/` directory
+   - Falls back to latest version if exact version types don't exist
+   - Returns actual version downloaded for config tracking
+
+4. **feat: integrate template selection into scaffold flow** (`949f6fd`)
+   - Updated `index.js` to use selected template
+   - Downloads TypeScript definitions for all templates (enables IntelliSense)
+   - Stores template name and typeDefsVersion in p5-config.json
+   - Updated success message to show template used
+   - Flow: template → version → mode → create project
+
+### Checkpoint Verification
+
+**Test Results:**
+- All four templates created with proper file structures
+- Template selection prompt shows all options with helpful hints
+- TypeScript definitions download successfully
+- Types fallback works when exact version not found
+- Config file stores template name and typeDefsVersion
+- Success message displays selected template
+
+**Template Structures:**
+
+*Basic Template:*
+```
+basic/
+├── index.html
+├── sketch.js
+├── style.css
+└── jsconfig.json
+```
+
+*Instance Template:*
+```
+instance/
+├── index.html
+├── sketch.js (with instance mode pattern)
+├── style.css
+└── jsconfig.json
+```
+
+*TypeScript Template:*
+```
+typescript/
+├── index.html
+├── sketch.ts (with type annotations)
+├── style.css
+└── tsconfig.json
+```
+
+*Empty Template:*
+```
+empty/
+├── index.html (minimal)
+└── jsconfig.json
+```
+
+**Updated p5-config.json Schema:**
+```json
+{
+  "version": "2.1.1",
+  "mode": "cdn",
+  "template": "typescript",
+  "typeDefsVersion": "2.1.1",
+  "lastUpdated": "2025-11-28T18:30:45.123Z"
+}
+```
+
+### Demo-able Features
+
+- Users can select from 4 different templates
+- TypeScript definitions downloaded automatically for IntelliSense
+- Instance mode template demonstrates proper p5.js instance pattern
+- TypeScript template includes proper tsconfig.json setup
+- Empty template provides minimal starting point
+- Template selection shown in success message
+- typeDefsVersion tracked in config for all templates
+
+### Ship It! 🚢
+
+Stage 5 is complete and working. Users can now:
+- Choose from basic, instance, typescript, or empty templates
+- Get TypeScript IntelliSense in all templates (including JavaScript)
+- Use instance mode for multiple sketches
+- Start TypeScript projects with proper configuration
+- Build custom projects from empty template
+
+**Ready to proceed to Stage 6: Update Existing Projects**
 
 ---
 
