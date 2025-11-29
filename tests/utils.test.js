@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateProjectName, validateTemplate, validateMode, validateVersion } from '../src/utils.js';
+import { validateProjectName, validateProjectPath, validateTemplate, validateMode, validateVersion } from '../src/utils.js';
 
 describe('utils validations', () => {
   it('validateProjectName rejects empty and invalid names', () => {
@@ -7,6 +7,19 @@ describe('utils validations', () => {
     expect(validateProjectName('my project')).toBeTruthy();
     expect(validateProjectName('.hidden')).toBeTruthy();
     expect(validateProjectName('good-name')).toBeNull();
+  });
+
+  it('validateProjectName handles numeric inputs', () => {
+    // Numeric inputs should be converted to strings and validated
+    expect(validateProjectName(1234)).toBeNull(); // Valid: "1234"
+    expect(validateProjectName(42)).toBeNull(); // Valid: "42"
+    expect(validateProjectName(0)).toBeNull(); // Valid: "0" is a valid name
+  });
+
+  it('validateProjectPath handles numeric inputs', () => {
+    // Numeric inputs should be converted to strings and validated
+    expect(validateProjectPath(1234)).toBeNull(); // Valid: "1234" is a relative path
+    expect(validateProjectPath(42)).toBeNull(); // Valid: "42" is a relative path
   });
 
   it('validateTemplate accepts known templates', () => {

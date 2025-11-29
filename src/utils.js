@@ -126,11 +126,12 @@ export async function removeDirectory(dirPath) {
  * Validates a project path for creating a new project.
  * Enforces relative paths only and checks for invalid characters.
  *
- * @param {string} projectPath - The project path to validate
+ * @param {string|number} projectPath - The project path to validate (converted to string if needed)
  * @returns {string|null} Error message if invalid, null if valid
  */
 export function validateProjectPath(projectPath) {
-  const trimmed = projectPath.trim();
+  // Convert to string to handle numeric inputs (e.g., "1234" parsed as number by minimist)
+  const trimmed = String(projectPath).trim();
 
   // Allow current directory
   if (trimmed === '.' || trimmed === '') {
@@ -154,33 +155,38 @@ export function validateProjectPath(projectPath) {
  * Validates a project name according to npm naming conventions.
  * Returns an error message if invalid, or null if valid.
  *
- * @param {string} name - The project name to validate
+ * @param {string|number} name - The project name to validate (converted to string if needed)
  * @returns {string|null} Error message if invalid, null if valid
  */
 export function validateProjectName(name) {
-  if (!name || name.trim() === '') {
+  // Convert to string to handle numeric inputs (e.g., "1234" parsed as number by minimist)
+  const nameStr = String(name);
+
+  if (!nameStr || nameStr.trim() === '') {
     return 'Project name cannot be empty';
   }
 
+  const trimmed = nameStr.trim();
+
   // Check for spaces
-  if (name.includes(' ')) {
+  if (trimmed.includes(' ')) {
     return 'Project name cannot contain spaces. Use hyphens or underscores instead (e.g., "my-sketch")';
   }
 
   // Check for invalid characters (only allow alphanumeric, hyphen, underscore, dot)
-  if (!/^[a-zA-Z0-9._-]+$/.test(name)) {
+  if (!/^[a-zA-Z0-9._-]+$/.test(trimmed)) {
     return 'Project name can only contain letters, numbers, hyphens, underscores, and dots';
   }
 
   // Check if starts with dot or hyphen
-  if (name.startsWith('.') || name.startsWith('-')) {
+  if (trimmed.startsWith('.') || trimmed.startsWith('-')) {
     return 'Project name cannot start with a dot or hyphen';
   }
 
   // Check for reserved names
   const reservedNames = ['node_modules', 'package.json', 'package-lock.json'];
-  if (reservedNames.includes(name.toLowerCase())) {
-    return `"${name}" is a reserved name and cannot be used`;
+  if (reservedNames.includes(trimmed.toLowerCase())) {
+    return `"${trimmed}" is a reserved name and cannot be used`;
   }
 
   return null; // Valid
