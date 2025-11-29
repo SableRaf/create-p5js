@@ -290,20 +290,6 @@ if (response.ok) {
 - Graceful error handling (returns false/empty array instead of throwing where appropriate)
 - UTF-8 encoding by default
 
-### Proof of Concept Validation Status
-
-The proof_of_concept modules have validated:
-✅ HTML manipulation using linkedom (not regex)
-✅ Multi-CDN detection and URL building
-✅ jsdelivr API interaction (correct endpoints and response structure)
-✅ Configuration file persistence
-✅ File I/O abstraction layer
-✅ User prompt interactions with @clack/prompts
-✅ Dependency injection pattern
-✅ Single responsibility principle
-
-**These implementations should be used as references** when building the production `src/` modules. The architectural patterns, API usage, and error handling strategies have been proven to work.
-
 ### Download URLs for Local Mode
 
 When downloading p5.js files for local mode, use the jsdelivr CDN:
