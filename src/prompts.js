@@ -1,4 +1,14 @@
 import * as p from '@clack/prompts';
+import Moniker from 'moniker';
+
+/**
+ * Generates a random, memorable project name using moniker
+ * @returns {string} A random project name (e.g., 'amicable-elephant')
+ */
+export function generateProjectName() {
+  return Moniker.choose();
+}
+
 /**
  * Creates and starts a spinner for long-running operations
  * @param {string} message - The message to display while spinning
