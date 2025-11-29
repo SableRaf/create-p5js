@@ -42,7 +42,7 @@ async function main() {
 
   // Handle --help flag
   if (args.help) {
-    console.log(`
+    p.log.message(`
 create-p5 - Scaffolding tool for p5.js projects
 
 USAGE:
@@ -80,33 +80,34 @@ EXAMPLES:
   // Validate project name
   const nameError = validateProjectName(projectName);
   if (nameError) {
-    console.error(`Error: ${nameError}`);
+    p.log.error(nameError);
     process.exit(1);
   }
 
   // Check if we're in an existing p5.js project (but not if running 'update' command)
   const currentConfigPath = path.join(process.cwd(), 'p5-config.json');
   if (await configExists(currentConfigPath)) {
-    console.log('Existing p5.js project detected (p5-config.json found).');
-    console.log('This directory is already a create-p5 project.');
-    console.log('\nTo update this project, use:');
-    console.log('  npx create-p5 update');
+    p.log.info('Existing p5.js project detected (p5-config.json found).');
+    p.log.info('This directory is already a create-p5 project.');
+    p.log.message('');
+    p.log.info('To update this project, use:');
+    p.log.info('  npx create-p5 update');
     process.exit(0);
   }
 
   // Check if target directory already exists
   const targetPath = path.join(process.cwd(), projectName);
   if (await directoryExists(targetPath)) {
-    console.error(`Error: Directory "${projectName}" already exists.`);
-    console.error(`Suggestion: Choose a different project name or remove the existing directory.`);
+    p.log.error(`Directory "${projectName}" already exists.`);
+    p.log.info(`Suggestion: Choose a different project name or remove the existing directory.`);
     process.exit(1);
   }
 
   p.intro(cyan('create-p5'));
-  console.log(`Creating project: ${blue(projectName)}`);
+  p.log.info(`Creating project: ${blue(projectName)}`);
 
   if (args.verbose) {
-    console.log(`${blue('Verbose mode enabled')}`);
+    p.log.info('Verbose mode enabled');
   }
 
   try {
@@ -119,11 +120,13 @@ EXAMPLES:
       s.stop(green('✓') + ' Fetched available versions');
     } catch (error) {
       s.stop(red('✗') + ' Failed to fetch versions');
-      console.error(`\n${red('Error:')} ${error.message}`);
-      console.error('\nTroubleshooting:');
-      console.error('  1. Check your internet connection');
-      console.error('  2. Verify that https://data.jsdelivr.com is accessible');
-      console.error('  3. Try again in a few moments');
+      p.log.message('');
+      p.log.error(error.message);
+      p.log.message('');
+      p.log.info('Troubleshooting:');
+      p.log.info('  1. Check your internet connection');
+      p.log.info('  2. Verify that https://data.jsdelivr.com is accessible');
+      p.log.info('  3. Try again in a few moments');
       process.exit(1);
     }
 
@@ -153,10 +156,10 @@ EXAMPLES:
     let selectedTemplate;
     if (args.template) {
       selectedTemplate = args.template;
-      console.log(`${green('✓')} Using template: ${blue(selectedTemplate)}`);
+      p.log.success(`Using template: ${blue(selectedTemplate)}`);
     } else if (args.yes) {
       selectedTemplate = 'basic';
-      console.log(`${green('✓')} Using default template: ${blue('basic')}`);
+      p.log.success(`Using default template: ${blue('basic')}`);
     } else {
       selectedTemplate = await selectTemplate();
     }
@@ -165,10 +168,10 @@ EXAMPLES:
     let selectedVersion;
     if (args.version) {
       selectedVersion = args.version === 'latest' ? latest : args.version;
-      console.log(`${green('✓')} Using p5.js version: ${blue(selectedVersion)}`);
+      p.log.success(`Using p5.js version: ${blue(selectedVersion)}`);
     } else if (args.yes) {
       selectedVersion = latest;
-      console.log(`${green('✓')} Using latest p5.js version: ${blue(latest)}`);
+      p.log.success(`Using latest p5.js version: ${blue(latest)}`);
     } else {
       selectedVersion = await selectVersion(versions, latest);
     }
@@ -177,24 +180,25 @@ EXAMPLES:
     let selectedMode;
     if (args.mode) {
       selectedMode = args.mode;
-      console.log(`${green('✓')} Using delivery mode: ${blue(selectedMode)}`);
+      p.log.success(`Using delivery mode: ${blue(selectedMode)}`);
     } else if (args.yes) {
       selectedMode = 'cdn';
-      console.log(`${green('✓')} Using default delivery mode: ${blue('cdn')}`);
+      p.log.success(`Using default delivery mode: ${blue('cdn')}`);
     } else {
       selectedMode = await selectMode();
     }
 
     // Show summary of choices if not using --yes flag
     if (!args.yes && (args.template || args.version || args.mode || args.git || args.types === false)) {
-      console.log('\nProject configuration:');
-      console.log(`  Project name: ${projectName}`);
-      console.log(`  Template: ${selectedTemplate}`);
-      console.log(`  p5.js version: ${selectedVersion}`);
-      console.log(`  Delivery mode: ${selectedMode}`);
-      console.log(`  Git initialization: ${args.git ? 'yes' : 'no'}`);
-      console.log(`  TypeScript definitions: ${args.types === false ? 'no' : 'yes'}`);
-      console.log('');
+      p.log.message('');
+      p.log.info('Project configuration:');
+      p.log.info(`  Project name: ${projectName}`);
+      p.log.info(`  Template: ${selectedTemplate}`);
+      p.log.info(`  p5.js version: ${selectedVersion}`);
+      p.log.info(`  Delivery mode: ${selectedMode}`);
+      p.log.info(`  Git initialization: ${args.git ? 'yes' : 'no'}`);
+      p.log.info(`  TypeScript definitions: ${args.types === false ? 'no' : 'yes'}`);
+      p.log.message('');
     }
 
     // Copy or fetch template files (local built-in templates or remote templates)
@@ -203,8 +207,8 @@ EXAMPLES:
       copySpinner.start('Fetching remote template');
       if (args.verbose) {
         const spec = normalizeTemplateSpec(selectedTemplate);
-        console.log(`  Remote template spec: ${spec}`);
-        console.log(`  Target path: ${targetPath}`);
+        p.log.info(`  Remote template spec: ${spec}`);
+        p.log.info(`  Target path: ${targetPath}`);
       }
 
       try {
@@ -221,8 +225,8 @@ EXAMPLES:
       // Copy template files
       copySpinner.start('Copying template files');
       if (args.verbose) {
-        console.log(`  Template path: ${templatePath}`);
-        console.log(`  Target path: ${targetPath}`);
+        p.log.info(`  Template path: ${templatePath}`);
+        p.log.info(`  Target path: ${targetPath}`);
       }
       await copyTemplateFiles(templatePath, targetPath);
       copySpinner.stop(green('✓') + ' Copied template files');
@@ -248,8 +252,9 @@ EXAMPLES:
         downloadSpinner.stop(green('✓') + ' Downloaded p5.js files');
       } catch (error) {
         downloadSpinner.stop(red('✗') + ' Failed to download p5.js files');
-        console.error(`${red('Error:')} ${error.message}`);
-        console.error('\nCleaning up...');
+        p.log.error(error.message);
+        p.log.message('');
+        p.log.info('Cleaning up...');
         await fs.rm(targetPath, { recursive: true, force: true });
         process.exit(1);
       }
@@ -273,13 +278,13 @@ EXAMPLES:
         typesSpinner.stop(green('✓') + ' Downloaded TypeScript definitions');
       } catch (error) {
         typesSpinner.stop(blue('⚠') + ' TypeScript definitions unavailable');
-        console.error(`${blue('Warning:')} ${error.message}`);
-        console.error('Continuing without TypeScript definitions...');
+        p.log.warn(error.message);
+        p.log.info('Continuing without TypeScript definitions...');
         // Don't fail the entire operation if type definitions fail
         typeDefsVersion = null;
       }
     } else {
-      console.log(`${blue('⚠')} Skipping TypeScript definitions download (--no-types flag)`);
+      p.log.warn('Skipping TypeScript definitions download (--no-types flag)');
     }
 
     // Create p5-config.json in project root
@@ -294,57 +299,65 @@ EXAMPLES:
     // Success summary
     p.outro(green('✓') + ' Project created successfully!');
 
-    console.log('\n' + cyan('Project Summary:'));
-    console.log(`  ${blue('Name:')}        ${projectName}`);
-    console.log(`  ${blue('Template:')}    ${selectedTemplate}`);
-    console.log(`  ${blue('p5.js:')}       ${selectedVersion}`);
-    console.log(`  ${blue('Mode:')}        ${selectedMode}`);
+    p.log.message('');
+    p.log.info(cyan('Project Summary:'));
+    p.log.info(`  ${blue('Name:')}        ${projectName}`);
+    p.log.info(`  ${blue('Template:')}    ${selectedTemplate}`);
+    p.log.info(`  ${blue('p5.js:')}       ${selectedVersion}`);
+    p.log.info(`  ${blue('Mode:')}        ${selectedMode}`);
     if (typeDefsVersion) {
-      console.log(`  ${blue('Types:')}       ${typeDefsVersion}`);
+      p.log.info(`  ${blue('Types:')}       ${typeDefsVersion}`);
     }
     if (args.git) {
-      console.log(`  ${blue('Git:')}         initialized`);
+      p.log.info(`  ${blue('Git:')}         initialized`);
     }
 
-    console.log('\n' + cyan('Next steps:'));
-    console.log(`  ${green('1.')} cd ${projectName}`);
-    console.log(`  ${green('2.')} Open ${blue('index.html')} in your browser`);
+    p.log.message('');
+    p.log.info(cyan('Next steps:'));
+    p.log.info(`  ${green('1.')} cd ${projectName}`);
+    p.log.info(`  ${green('2.')} Open ${blue('index.html')} in your browser`);
 
     // Add template-specific tips
     if (selectedTemplate === 'typescript') {
-      console.log('\n' + cyan('TypeScript tips:'));
-      console.log(`  • Use a TypeScript-aware editor like VS Code`);
-      console.log(`  • Install TypeScript: ${blue('npm install -g typescript')}`);
-      console.log(`  • Compile: ${blue('tsc sketch.ts')}`);
+      p.log.message('');
+      p.log.info(cyan('TypeScript tips:'));
+      p.log.info(`  • Use a TypeScript-aware editor like VS Code`);
+      p.log.info(`  • Install TypeScript: ${blue('npm install -g typescript')}`);
+      p.log.info(`  • Compile: ${blue('tsc sketch.ts')}`);
     }
 
     if (selectedTemplate === 'instance') {
-      console.log('\n' + cyan('Instance mode tips:'));
-      console.log(`  • Multiple sketches can run on the same page`);
-      console.log(`  • Use ${blue('new p5(sketch, container)')} to create instances`);
+      p.log.message('');
+      p.log.info(cyan('Instance mode tips:'));
+      p.log.info(`  • Multiple sketches can run on the same page`);
+      p.log.info(`  • Use ${blue('new p5(sketch, container)')} to create instances`);
     }
 
     if (args.git) {
-      console.log('\n' + cyan('Git tips:'));
-      console.log(`  • Make your first commit: ${blue('git add . && git commit -m "Initial commit"')}`);
+      p.log.message('');
+      p.log.info(cyan('Git tips:'));
+      p.log.info(`  • Make your first commit: ${blue('git add . && git commit -m "Initial commit"')}`);
       if (selectedMode === 'local') {
-        console.log(`  • ${blue('lib/')} directory is already in .gitignore`);
+        p.log.info(`  • ${blue('lib/')} directory is already in .gitignore`);
       }
     }
 
-    console.log('\n' + cyan('Documentation:'));
-    console.log(`  • p5.js reference: ${blue('https://p5js.org/reference/')}`);
-    console.log(`  • Examples: ${blue('https://p5js.org/examples/')}`);
-    console.log(`  • Update project: ${blue('npx create-p5 update')}`);
+    p.log.message('');
+    p.log.info(cyan('Documentation:'));
+    p.log.info(`  • p5.js reference: ${blue('https://p5js.org/reference/')}`);
+    p.log.info(`  • Examples: ${blue('https://p5js.org/examples/')}`);
+    p.log.info(`  • Update project: ${blue('npx create-p5 update')}`);
 
-    console.log(''); // Empty line for spacing
+    p.log.message(''); // Empty line for spacing
   } catch (error) {
     p.outro(red('✗') + ' Project creation failed');
-    console.error(`\n${red('Error:')} ${error.message}`);
+    p.log.message('');
+    p.log.error(error.message);
 
     if (args.verbose) {
-      console.error('\nStack trace:');
-      console.error(error.stack);
+      p.log.message('');
+      p.log.info('Stack trace:');
+      p.log.info(error.stack);
     }
 
     // Attempt to clean up the project directory if it was partially created
@@ -356,13 +369,14 @@ EXAMPLES:
         cleanupSpinner.stop(green('✓') + ' Cleaned up incomplete project');
       }
     } catch (cleanupError) {
-      console.error(`${red('Warning:')} Could not clean up project directory: ${cleanupError.message}`);
+      p.log.warn(`Could not clean up project directory: ${cleanupError.message}`);
     }
 
-    console.error('\nIf the problem persists:');
-    console.error(`  • Try with ${blue('--verbose')} flag for detailed output`);
-    console.error(`  • Check write permissions in the current directory`);
-    console.error(`  • Report issues at ${blue('https://github.com/sableraf/create-p5/issues')}`);
+    p.log.message('');
+    p.log.info('If the problem persists:');
+    p.log.info(`  • Try with ${blue('--verbose')} flag for detailed output`);
+    p.log.info(`  • Check write permissions in the current directory`);
+    p.log.info(`  • Report issues at ${blue('https://github.com/sableraf/create-p5/issues')}`);
 
     process.exit(1);
   }
