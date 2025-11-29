@@ -104,6 +104,7 @@ export async function downloadP5Files(version, targetDir, spinner = null) {
 
 /**
  * Downloads TypeScript type definitions for p5.js from jsdelivr CDN.
+ * Downloads both global.d.ts and p5.d.ts as global.d.ts imports from p5.d.ts.
  * Falls back to the latest version if the specified version's types are not found.
  * @param {string} version - The p5.js version to download type definitions for
  * @param {string} targetDir - The directory path where type definitions should be saved
@@ -113,7 +114,12 @@ export async function downloadP5Files(version, targetDir, spinner = null) {
  */
 export async function downloadTypeDefinitions(version, targetDir, spinner = null) {
   const cdnBase = 'https://cdn.jsdelivr.net/npm';
-  const typeUrl = `${cdnBase}/p5@${version}/types/global.d.ts`;
+
+  // Define both files that need to be downloaded
+  const typeFiles = [
+    { name: 'global.d.ts', url: `${cdnBase}/p5@${version}/types/global.d.ts` },
+    { name: 'p5.d.ts', url: `${cdnBase}/p5@${version}/types/p5.d.ts` }
+  ];
 
   try {
     if (spinner) {
@@ -121,21 +127,32 @@ export async function downloadTypeDefinitions(version, targetDir, spinner = null
     }
 
     // Try to download the exact version first
-    let response = await fetch(typeUrl);
+    let response = await fetch(typeFiles[0].url);
     let actualVersion = version;
 
     // If not found, fallback to latest p5.js version
     if (!response.ok) {
       const { latest } = await fetchVersions();
-      const latestTypeUrl = `${cdnBase}/p5@${latest}/types/global.d.ts`;
-      response = await fetch(latestTypeUrl);
       actualVersion = latest;
+      // Update URLs to use latest version
+      typeFiles[0].url = `${cdnBase}/p5@${latest}/types/global.d.ts`;
+      typeFiles[1].url = `${cdnBase}/p5@${latest}/types/p5.d.ts`;
+      response = await fetch(typeFiles[0].url);
     }
 
     if (response.ok) {
-      const content = await response.text();
-      const targetPath = `${targetDir}/global.d.ts`;
-      await writeFile(targetPath, content, 'utf-8');
+      // Download and write both type definition files
+      for (const file of typeFiles) {
+        const fileResponse = await fetch(file.url);
+
+        if (!fileResponse.ok) {
+          throw new Error(`Failed to download ${file.name}: HTTP ${fileResponse.status}`);
+        }
+
+        const content = await fileResponse.text();
+        const targetPath = `${targetDir}/${file.name}`;
+        await writeFile(targetPath, content, 'utf-8');
+      }
 
       if (spinner) {
         spinner.stop(`TypeScript definitions downloaded (v${actualVersion})`);

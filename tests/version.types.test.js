@@ -46,10 +46,16 @@ describe('downloadTypeDefinitions fallback', () => {
     const actual = await downloadTypeDefinitions('0.0.1', tmpDir);
     expect(actual).toBe('1.9.0');
 
-    const fileExists = await fs.stat(path.join(tmpDir, 'global.d.ts'))
+    // Verify both global.d.ts and p5.d.ts are downloaded
+    const globalFileExists = await fs.stat(path.join(tmpDir, 'global.d.ts'))
       .then(() => true)
       .catch(() => false);
 
-    expect(fileExists).toBe(true);
+    const p5FileExists = await fs.stat(path.join(tmpDir, 'p5.d.ts'))
+      .then(() => true)
+      .catch(() => false);
+
+    expect(globalFileExists).toBe(true);
+    expect(p5FileExists).toBe(true);
   });
 });
