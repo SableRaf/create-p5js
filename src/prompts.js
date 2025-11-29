@@ -1,12 +1,19 @@
 import * as p from '@clack/prompts';
-import Moniker from 'moniker';
+import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
 
 /**
- * Generates a random, memorable project name using moniker
- * @returns {string} A random project name (e.g., 'amicable-elephant')
+ * Generates a random, memorable project name using adjectives and animals
+ * @returns {string} A random project name (e.g., 'brave-elephant')
  */
 export function generateProjectName() {
-  return Moniker.choose();
+  // either color-animal or adjective-animal
+  const useColor = Math.random() < 0.5;
+  const config = {
+    dictionaries: useColor ? [colors, animals] : [adjectives, animals],
+    separator: '-',
+    style: 'lowerCase'
+  };
+  return uniqueNamesGenerator(config);
 }
 
 /**

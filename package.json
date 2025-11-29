@@ -29,7 +29,7 @@
     "kolorist": "^1.8.0",
     "linkedom": "^0.18.12",
     "minimist": "^1.2.8",
-    "moniker": "^0.1.2"
+    "unique-names-generator": "^4.7.1"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^1.0.0",
