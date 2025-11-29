@@ -24,7 +24,7 @@
     "run": "node ./index.js"
   },
   "dependencies": {
-    "@clack/prompts": "^0.7.0",
+    "@clack/prompts": "^0.11.0",
     "degit": "^2.8.4",
     "kolorist": "^1.8.0",
     "linkedom": "^0.18.12",

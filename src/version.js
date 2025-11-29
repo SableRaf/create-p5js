@@ -21,7 +21,7 @@ export function filterStableVersions(versions) {
 /**
  * Fetches available p5.js versions from jsdelivr CDN API
  * @param {boolean} [includePrerelease=false] - Whether to include pre-release versions (RC, beta, alpha)
- * @returns {Promise<{ latest: string, versions: string[] }>} Object containing latest version and array of up to 15 most recent versions
+ * @returns {Promise<{ latest: string, versions: string[] }>} Object containing latest version and array of all versions (stable only if includePrerelease is false)
  * @throws {Error} If network request fails or API is unreachable
  */
 export async function fetchVersions(includePrerelease = false) {
@@ -43,9 +43,6 @@ export async function fetchVersions(includePrerelease = false) {
     if (!includePrerelease) {
       versions = filterStableVersions(versions);
     }
-
-    // Limit to 15 most recent versions AFTER filtering
-    versions = versions.slice(0, 15);
 
     return { latest, versions };
   } catch (error) {

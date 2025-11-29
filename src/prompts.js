@@ -39,7 +39,8 @@ export async function selectVersion(versions, latest) {
     options: versions.map(v => ({
       value: v,
       label: v === latest ? `${v} (latest)` : v
-    }))
+    })),
+    maxItems: 7
   });
 }
 
@@ -105,7 +106,7 @@ export async function promptProjectPath() {
   const randomName = generateProjectName();
 
   return await p.text({
-    message: 'Where should we create your project?',
+    message: 'Where should we create your p5.js sketch?',
     placeholder: `. (current directory)`,
     initialValue: `./${randomName}`,
     validate: (value) => {
