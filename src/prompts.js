@@ -1,4 +1,14 @@
 import * as p from '@clack/prompts';
+/**
+ * Creates and starts a spinner for long-running operations
+ * @param {string} message - The message to display while spinning
+ * @returns {Object} Spinner object with stop() method
+ */
+export function startSpinner(message) {
+  const spinner = p.spinner();
+  spinner.start(message);
+  return spinner;
+}
 
 /**
  * Displays a version selection prompt to the user
@@ -71,17 +81,53 @@ export async function selectMode() {
 }
 
 /**
+ * Prompts user for project directory path with validation
+ * @returns {Promise<string>} The validated directory path (relative or '.' for current)
+ */
+export async function promptProjectPath() {
+  const randomName = generateProjectName();
+
+  return await p.text({
+    message: 'Where should we create your project?',
+    placeholder: `. (current directory)`,
+    initialValue: `./${randomName}`,
+    validate: (value) => {
+      const trimmed = value.trim();
+
+      // Allow current directory
+      if (trimmed === '.' || trimmed === '') {
+        return;
+      }
+
+      // Enforce relative paths (no absolute paths)
+      if (trimmed.startsWith('/') || /^[A-Za-z]:/.test(trimmed)) {
+        return 'Please use a relative path (e.g., "./my-sketch" or "my-sketch")';
+      }
+
+      // Check for invalid characters
+      if (/[<>:"|?*]/.test(trimmed)) {
+        return 'Path contains invalid characters';
+      }
+
+      return;
+    }
+  });
+}
+
+/**
  * Run the full interactive prompt flow and return a structured options object
  * @param {string[]} versions - Available versions (descending order)
  * @param {string} latest - Latest version string
- * @returns {Promise<{template:string,mode:string,version:string}>}
+ * @returns {Promise<{projectPath:string,template:string,mode:string,version:string}>}
  */
 export async function runInteractivePrompts(versions, latest) {
+  const projectPath = await promptProjectPath();
   const template = await selectTemplate();
   const mode = await selectMode();
   const version = await selectVersion(versions, latest);
 
   return {
+    projectPath: projectPath.trim() || '.',
     template,
     mode,
     version

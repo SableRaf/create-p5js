@@ -60,10 +60,11 @@ export async function fetchVersions(includePrerelease = false) {
  * Downloads p5.js files for local mode from jsdelivr CDN
  * @param {string} version - The p5.js version to download
  * @param {string} targetDir - The directory path where files should be saved
+ * @param {Object} [spinner] - Optional spinner object with stop() method for progress feedback
  * @returns {Promise<void>}
  * @throws {Error} If download fails or files cannot be written
  */
-export async function downloadP5Files(version, targetDir) {
+export async function downloadP5Files(version, targetDir, spinner = null) {
   const cdnBase = 'https://cdn.jsdelivr.net/npm';
 
   // Download both regular and minified versions
@@ -74,6 +75,10 @@ export async function downloadP5Files(version, targetDir) {
 
   try {
     for (const file of files) {
+      if (spinner) {
+        spinner.message(`Downloading ${file.name}...`);
+      }
+
       const response = await fetch(file.url);
 
       if (!response.ok) {
@@ -84,7 +89,15 @@ export async function downloadP5Files(version, targetDir) {
       const targetPath = `${targetDir}/${file.name}`;
       await writeFile(targetPath, content, 'utf-8');
     }
+
+    if (spinner) {
+      spinner.stop(`p5.js files downloaded successfully`);
+    }
   } catch (error) {
+    if (spinner) {
+      spinner.stop(`Failed to download p5.js files`);
+    }
+
     if (error.message.includes('fetch failed') || error.code === 'ENOTFOUND') {
       throw new Error('Unable to download p5.js files. Please check your internet connection and try again.');
     }
@@ -97,14 +110,19 @@ export async function downloadP5Files(version, targetDir) {
  * Falls back to the latest version if the specified version's types are not found.
  * @param {string} version - The p5.js version to download type definitions for
  * @param {string} targetDir - The directory path where type definitions should be saved
+ * @param {Object} [spinner] - Optional spinner object with stop() method for progress feedback
  * @returns {Promise<string>} The actual version of the type definitions downloaded
  * @throws {Error} If download fails or files cannot be written
  */
-export async function downloadTypeDefinitions(version, targetDir) {
+export async function downloadTypeDefinitions(version, targetDir, spinner = null) {
   const cdnBase = 'https://cdn.jsdelivr.net/npm';
   const typeUrl = `${cdnBase}/p5@${version}/types/global.d.ts`;
 
   try {
+    if (spinner) {
+      spinner.message('Downloading TypeScript definitions...');
+    }
+
     // Try to download the exact version first
     let response = await fetch(typeUrl);
     let actualVersion = version;
@@ -121,10 +139,18 @@ export async function downloadTypeDefinitions(version, targetDir) {
       const content = await response.text();
       const targetPath = `${targetDir}/global.d.ts`;
       await writeFile(targetPath, content, 'utf-8');
+
+      if (spinner) {
+        spinner.stop(`TypeScript definitions downloaded (v${actualVersion})`);
+      }
     }
 
     return actualVersion;
   } catch (error) {
+    if (spinner) {
+      spinner.stop('Failed to download TypeScript definitions');
+    }
+
     if (error.message.includes('fetch failed') || error.code === 'ENOTFOUND') {
       throw new Error('Unable to download TypeScript definitions. Please check your internet connection and try again.');
     }

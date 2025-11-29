@@ -123,6 +123,34 @@ export async function removeDirectory(dirPath) {
 }
 
 /**
+ * Validates a project path for creating a new project.
+ * Enforces relative paths only and checks for invalid characters.
+ *
+ * @param {string} projectPath - The project path to validate
+ * @returns {string|null} Error message if invalid, null if valid
+ */
+export function validateProjectPath(projectPath) {
+  const trimmed = projectPath.trim();
+
+  // Allow current directory
+  if (trimmed === '.' || trimmed === '') {
+    return null;
+  }
+
+  // Enforce relative paths (no absolute paths)
+  if (trimmed.startsWith('/') || /^[A-Za-z]:/.test(trimmed)) {
+    return 'Please use a relative path (e.g., "./my-sketch" or "my-sketch")';
+  }
+
+  // Check for invalid characters
+  if (/[<>:"|?*]/.test(trimmed)) {
+    return 'Path contains invalid characters';
+  }
+
+  return null;
+}
+
+/**
  * Validates a project name according to npm naming conventions.
  * Returns an error message if invalid, or null if valid.
  *
