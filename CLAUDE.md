@@ -43,7 +43,7 @@ create-p5/
 ## Key Dependencies
 
 **Production:**
-- `@clack/prompts` - Interactive prompts with spinners
+- `@clack/prompts` - Interactive prompts (https://bomb.sh/docs/clack/packages/prompts/)
 - `kolorist` - Terminal colors
 - `minimist` - Argument parsing
 - `linkedom` - Fast, standards-compliant HTML DOM parser for Node.js
