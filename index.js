@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
 import minimist from 'minimist';
 import * as p from '@clack/prompts';
-import { green, red, blue, cyan } from 'kolorist';
+import { green, red, blue, cyan, bgBlue, bgMagenta, white } from 'kolorist';
 import { copyTemplateFiles, validateProjectName, directoryExists, validateTemplate, validateMode, validateVersion } from './src/utils.js';
 import { fetchVersions, downloadP5Files, downloadTypeDefinitions } from './src/version.js';
 import { selectVersion, selectMode, selectTemplate, promptProjectPath, startSpinner, generateProjectName } from './src/prompts.js';
@@ -89,7 +89,9 @@ EXAMPLES:
     process.exit(0);
   }
 
-  p.intro(cyan('create-p5'));
+  p.intro(bgMagenta(white(' create-p5 ')));
+
+  const cancelledMessage = 'You cancelled the sketch creation';
 
   // Determine project path (command argument, flag, or prompt)
   let projectPath;
@@ -102,6 +104,10 @@ EXAMPLES:
   } else {
     // Interactive mode: prompt for path
     projectPath = await promptProjectPath();
+    if (p.isCancel(projectPath)) {
+      p.cancel(cancelledMessage);
+      process.exit(0);
+    }
   }
 
   // Normalize the path
@@ -214,6 +220,10 @@ EXAMPLES:
       p.log.success(`Using default template: ${blue('basic')}`);
     } else {
       selectedTemplate = await selectTemplate();
+      if (p.isCancel(selectedTemplate)) {
+        p.cancel(cancelledMessage);
+        process.exit(0);
+      }
     }
 
     // Determine version (flag or prompt)
@@ -226,6 +236,10 @@ EXAMPLES:
       p.log.success(`Using latest p5.js version: ${blue(latest)}`);
     } else {
       selectedVersion = await selectVersion(versions, latest);
+      if (p.isCancel(selectedVersion)) {
+        p.cancel(cancelledMessage);
+        process.exit(0);
+      }
     }
 
     // Determine delivery mode (flag or prompt)
@@ -238,6 +252,10 @@ EXAMPLES:
       p.log.success(`Using default delivery mode: ${blue('cdn')}`);
     } else {
       selectedMode = await selectMode();
+      if (p.isCancel(selectedMode)) {
+        p.cancel(cancelledMessage);
+        process.exit(0);
+      }
     }
 
     // Show summary of choices if not using --yes flag
@@ -424,11 +442,12 @@ EXAMPLES:
       p.log.warn(`Could not clean up project directory: ${cleanupError.message}`);
     }
 
-    p.log.message('');
-    p.log.info('If the problem persists:');
-    p.log.info(`  • Try with ${blue('--verbose')} flag for detailed output`);
-    p.log.info(`  • Check write permissions in the current directory`);
-    p.log.info(`  • Report issues at ${blue('https://github.com/sableraf/create-p5/issues')}`);
+    p.note(
+      `• Try with ${blue('--verbose')} flag for detailed output\n` +
+        `• Check write permissions in the current directory\n` +
+        `• Report issues at ${blue('https://github.com/sableraf/create-p5/issues')}`,
+      'If the problem persists:'
+    );
 
     process.exit(1);
   }
