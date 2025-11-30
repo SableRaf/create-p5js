@@ -333,7 +333,7 @@ This implementation plan follows incremental development principles to build `cr
 - Set up Vitest test framework
 - Create `tests/version.test.js` for API interactions
 - Create `tests/config.test.js` for configuration management
-- Create `tests/template.test.js` for HTML manipulation
+- Create `tests/htmlManager.test.js` for HTML manipulation
 - Achieve >80% code coverage for core modules
 
 ### Commit 3: Write comprehensive README
