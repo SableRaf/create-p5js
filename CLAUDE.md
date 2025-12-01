@@ -15,28 +15,40 @@ create-p5 is an npm scaffolding tool that enables users to quickly create and ma
 ```
 create-p5/
 
-├── index.js                 # Entry point (#!/usr/bin/env node)
+├── index.js                 # Entry point - routing only
 ├── package.json
+├── locales/                 # Translation files (i18n)
+│   └── en/                  # English locale
+│       ├── cli.json         # CLI messages (help, intro, outro)
+│       ├── errors.json      # Error messages
+│       ├── prompts.json     # Prompt text and options
+│       ├── info.json        # Informational messages
+│       ├── notes.json       # Success summaries and tips
+│       └── spinners.json    # Loading messages
 ├── docs/
 │   ├── DOCUMENTATION_GUIDELINES.md   # Coding standards and documentation practices
 │   ├── PRODUCT_REQUIREMENTS.md       # High-level product requirements and features
 │   └── WORKFLOW_GUIDELINES.md        # Development workflow and best practices
-│   └── IMPLEMENTATION_PLAN.md        # Implementation plan and steps (generated from WORKFLOW_GUIDELINES)
 ├── src/
-│   ├── cli.js              # Main CLI logic and routing
-│   ├── scaffold.js         # New project creation
-│   ├── update.js           # Update existing projects
-│   ├── prompts.js          # Interactive prompts
-│   ├── config.js           # p5-config.json management
-│   ├── version.js          # Version fetching from jsdelivr
-│   ├── template.js         # Template operations
-│   ├── git.js              # Git operations
-│   └── utils.js            # Utilities (logging, validation, etc.)
+│   ├── i18n/                # Internationalization layer
+│   │   └── index.js         # Load locales, provide t() function
+│   ├── ui/                  # UI primitives (NO copy)
+│   │   ├── display.js       # Display primitives (intro, outro, info, etc.)
+│   │   └── prompts.js       # Prompt primitives (template, version, mode, etc.)
+│   ├── operations/          # Business logic (NO copy)
+│   │   ├── scaffold.js      # New project creation workflow
+│   │   └── update.js        # Update existing projects workflow
+│   ├── config.js            # p5-config.json management
+│   ├── version.js           # Version fetching from jsdelivr
+│   ├── htmlManager.js       # HTML manipulation and script tag injection
+│   ├── templateFetcher.js   # Remote template fetching
+│   ├── git.js               # Git operations
+│   └── utils.js             # Utilities (validation, file ops, etc.)
 ├── templates/
-│   ├── basic/              # Standard p5.js with global mode
-│   ├── instance/           # Instance mode for multiple sketches
-│   ├── typescript/         # TypeScript setup with type definitions
-│   └── empty/              # Minimal HTML only
+│   ├── basic/               # Standard p5.js with global mode
+│   ├── instance/            # Instance mode for multiple sketches
+│   ├── typescript/          # TypeScript setup with type definitions
+│   └── empty/               # Minimal HTML only
 └── tests/
 ```
 
@@ -324,6 +336,190 @@ npx create-p5 update --version 1.10.0
 # Switch delivery mode
 npx create-p5 mode local
 ```
+
+## Internationalization (i18n) Architecture
+
+create-p5 uses a complete i18n-ready architecture with all user-facing text extracted into JSON translation files.
+
+### Architecture Overview
+
+**Four-Layer Separation:**
+1. **Translation Data** (`locales/`) - Pure JSON data files
+2. **i18n Infrastructure** (`src/i18n/`) - Translation loading and interpolation
+3. **UI Primitives** (`src/ui/`) - Presentation mechanisms
+4. **Business Logic** (`src/operations/`) - Application workflows
+
+### Translation Files
+
+All user-facing text lives in `locales/en/*.json`:
+
+```
+locales/en/
+├── cli.json         # CLI messages, help text, branding
+├── errors.json      # Error messages and troubleshooting
+├── prompts.json     # Interactive prompt text and validation
+├── info.json        # Informational messages and status updates
+├── notes.json       # Success summaries, tips, project info
+└── spinners.json    # Loading messages and completion states
+```
+
+**Translation Key Format:**
+- Use dot notation: `category.subcategory.name`
+- Examples: `error.fetchVersions.failed`, `note.projectSummary.title`
+- Stable keys: never change keys after creation
+
+**Interpolation:**
+```json
+{
+  "error.directoryExists": "Directory \"{path}\" already exists.",
+  "prompt.version.latestLabel": "{version} (latest)"
+}
+```
+
+Usage:
+```javascript
+t('error.directoryExists', { path: './my-sketch' })
+// => "Directory "./my-sketch" already exists."
+```
+
+### i18n Infrastructure (src/i18n/)
+
+**Core exports:**
+```javascript
+import { t, setLocale, getLocale, detectLocale } from './src/i18n/index.js';
+
+// Translate with interpolation
+const message = t('error.directoryExists', { path: './sketch' });
+
+// Change locale
+setLocale('fr');
+
+// Auto-detect from environment
+const locale = detectLocale(); // Checks LC_ALL, LC_MESSAGES, LANG
+```
+
+**How it works:**
+1. Loads all JSON files from `locales/{locale}/`
+2. Merges into single message map
+3. Provides `t(key, vars)` function with simple interpolation
+4. Replaces `{key}` with `vars.key`
+
+### UI Primitives (src/ui/)
+
+**Display Primitives (`src/ui/display.js`):**
+```javascript
+import * as display from './src/ui/display.js';
+
+// All functions take translation keys
+display.intro();                                    // Shows branded intro
+display.info('info.creatingIn', { path: './sketch' });
+display.success('note.success.created');
+display.error('error.fetchVersions.failed');
+display.warn('info.skipTypes');
+
+// Spinners with i18n
+const s = display.spinner('spinner.fetchingVersions');
+s.stop('spinner.fetchedVersions');
+
+// Notes (multi-line boxes)
+display.note(['note.nextSteps.step1', 'note.nextSteps.step2'],
+  'note.nextSteps.title',
+  { projectName: 'my-sketch' });
+```
+
+**Prompt Primitives (`src/ui/prompts.js`):**
+```javascript
+import * as prompts from './src/ui/prompts.js';
+
+// All prompts use translation keys internally
+const template = await prompts.promptTemplate();
+const version = await prompts.promptVersion(versions, latest);
+const mode = await prompts.promptMode();
+const action = await prompts.promptUpdateAction();
+const shouldDelete = await prompts.confirmDeleteLib();
+
+// Check for cancellation
+if (prompts.isCancel(response)) {
+  display.cancel('prompt.cancel.sketchCreation');
+}
+```
+
+### Operations Layer (src/operations/)
+
+**Business logic uses UI primitives:**
+```javascript
+// src/operations/scaffold.js
+import * as display from '../ui/display.js';
+import * as prompts from '../ui/prompts.js';
+import { t } from '../i18n/index.js';
+
+export async function scaffold(args) {
+  display.intro();
+
+  // Use prompts
+  const template = await prompts.promptTemplate();
+
+  // Use display for messages
+  display.info('info.creatingIn', { path: projectPath });
+
+  // Use t() for dynamic strings
+  throw new Error(t('error.fetchTemplate', { template, error: err.message }));
+}
+```
+
+### Adding New Messages
+
+**1. Add to appropriate JSON file:**
+```json
+// locales/en/errors.json
+{
+  "error.myNewError": "Something went wrong: {details}"
+}
+```
+
+**2. Use in code:**
+```javascript
+display.error('error.myNewError', { details: 'file not found' });
+```
+
+### Adding New Locales (Future)
+
+To add French support:
+```bash
+cp -r locales/en locales/fr
+# Edit all JSON files in locales/fr/
+```
+
+Users can set locale:
+```javascript
+setLocale('fr');
+```
+
+Or via environment:
+```bash
+LANG=fr_FR.UTF-8 npm create p5@latest
+```
+
+### Philosophy
+
+**Zero Copy in Source Code:**
+- NO hardcoded strings in `.js` files
+- ALL user-facing text in JSON files
+- Colors/formatting applied in display layer
+- Content always from translations
+
+**Separation of Concerns:**
+- **locales/**: What to say (data)
+- **src/i18n/**: How to load it (infrastructure)
+- **src/ui/**: How to display it (presentation)
+- **src/operations/**: What to do (logic)
+
+**Benefits:**
+- ✅ Complete i18n readiness
+- ✅ Easy to add languages
+- ✅ Consistent messaging
+- ✅ Testable without UI
+- ✅ Clear separation of concerns
 
 ## Important Architectural Principles
 
