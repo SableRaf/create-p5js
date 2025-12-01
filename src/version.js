@@ -29,6 +29,68 @@ export function parseVersion(version) {
 }
 
 /**
+ * Fetches available @types/p5 versions from jsdelivr CDN API
+ * @returns {Promise<string[]>} Array of available @types/p5 versions
+ * @throws {Error} If network request fails or API is unreachable
+ */
+export async function fetchTypesVersions() {
+  const apiUrl = 'https://data.jsdelivr.com/v1/package/npm/@types/p5';
+
+  try {
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.versions;
+  } catch (error) {
+    if (error.message.includes('fetch failed') || error.code === 'ENOTFOUND') {
+      throw new Error('Unable to reach jsdelivr CDN API for @types/p5. Please check your internet connection and try again.');
+    }
+    throw new Error(`Failed to fetch @types/p5 versions: ${error.message}`);
+  }
+}
+
+/**
+ * Finds the closest matching version from available versions
+ * Prioritizes exact major.minor match, then closest minor within same major
+ * @param {string} targetVersion - The target version to match (e.g., "1.4.0")
+ * @param {string[]} availableVersions - Array of available versions to search
+ * @returns {string|null} The closest matching version, or null if none found
+ */
+export function findClosestVersion(targetVersion, availableVersions) {
+  const target = parseVersion(targetVersion);
+  const candidates = availableVersions
+    .map(v => {
+      try {
+        return parseVersion(v);
+      } catch {
+        return null;
+      }
+    })
+    .filter(v => v !== null);
+
+  // Filter to same major version
+  const sameMajor = candidates.filter(v => v.major === target.major);
+  if (sameMajor.length === 0) return null;
+
+  // Try exact major.minor match first
+  const sameMinor = sameMajor.filter(v => v.minor === target.minor);
+  if (sameMinor.length > 0) {
+    // Return highest patch in same major.minor
+    sameMinor.sort((a, b) => b.patch - a.patch);
+    return `${sameMinor[0].major}.${sameMinor[0].minor}.${sameMinor[0].patch}`;
+  }
+
+  // Find closest minor version
+  sameMajor.sort((a, b) => Math.abs(a.minor - target.minor) - Math.abs(b.minor - target.minor));
+  const closest = sameMajor[0];
+  return `${closest.major}.${closest.minor}.${closest.patch}`;
+}
+
+/**
  * Determines whether to use @types/p5 or bundled types based on p5.js version
  * @param {string} version - The p5.js version
  * @returns {{ useTypesPackage: boolean, reason: string }} Strategy information
@@ -36,19 +98,11 @@ export function parseVersion(version) {
 export function getTypesStrategy(version) {
   const parsed = parseVersion(version);
 
-  // p5.js 2.x bundled types starting from 2.0.2
+  // p5.js 2.x uses bundled types (even 2.0.0-2.0.1, but will need to find closest available)
   if (parsed.major >= 2) {
-    if (parsed.major === 2 && parsed.minor === 0 && parsed.patch < 2) {
-      // 2.0.0 and 2.0.1 don't have bundled types yet
-      return {
-        useTypesPackage: true,
-        reason: 'p5.js 2.0.0-2.0.1 do not have bundled types'
-      };
-    }
-    // 2.0.2+ have bundled types
     return {
       useTypesPackage: false,
-      reason: 'p5.js 2.x has bundled types starting from 2.0.2'
+      reason: 'p5.js 2.x has bundled types'
     };
   }
 
@@ -155,8 +209,8 @@ export async function downloadP5Files(version, targetDir, spinner = null) {
 /**
  * Downloads TypeScript type definitions for p5.js from jsdelivr CDN.
  * Uses a two-tier strategy:
- * - For p5.js 1.x: Downloads from @types/p5 package (up to 1.7.7)
- * - For p5.js 2.x (2.0.2+): Downloads bundled types from p5 package
+ * - For p5.js 1.x: Downloads from @types/p5 package, finding closest version match
+ * - For p5.js 2.x: Downloads bundled types from p5 package, finding closest version if needed
  * For instance-mode sketches, downloads only the main definition file.
  * For global-mode sketches, downloads both global.d.ts and main definition file.
  * @param {string} version - The p5.js version to download type definitions for
@@ -181,20 +235,27 @@ export async function downloadTypeDefinitions(version, targetDir, spinner = null
     let actualTypesVersion;
 
     if (strategy.useTypesPackage) {
-      // Use @types/p5 package for p5.js 1.x (and 2.0.0-2.0.1)
-      // Latest available @types/p5 is 1.7.7
-      const LATEST_TYPES_VERSION = '1.7.7';
-      actualTypesVersion = LATEST_TYPES_VERSION;
+      // Use @types/p5 package for p5.js 1.x
+      // Fetch available versions and find closest match
+      const typesVersions = await fetchTypesVersions();
+      const matchedVersion = findClosestVersion(version, typesVersions);
+
+      if (!matchedVersion) {
+        throw new Error(`No compatible @types/p5 version found for p5.js ${version}`);
+      }
+
+      actualTypesVersion = matchedVersion;
 
       // For @types/p5, the main file is index.d.ts
       typeFiles = isInstanceMode
-        ? [{ name: 'index.d.ts', url: `${cdnBase}/@types/p5@${LATEST_TYPES_VERSION}/index.d.ts` }]
+        ? [{ name: 'index.d.ts', url: `${cdnBase}/@types/p5@${matchedVersion}/index.d.ts` }]
         : [
-            { name: 'global.d.ts', url: `${cdnBase}/@types/p5@${LATEST_TYPES_VERSION}/global.d.ts` },
-            { name: 'index.d.ts', url: `${cdnBase}/@types/p5@${LATEST_TYPES_VERSION}/index.d.ts` }
+            { name: 'global.d.ts', url: `${cdnBase}/@types/p5@${matchedVersion}/global.d.ts` },
+            { name: 'index.d.ts', url: `${cdnBase}/@types/p5@${matchedVersion}/index.d.ts` }
           ];
     } else {
-      // Use bundled types from p5 package for 2.0.2+
+      // Use bundled types from p5 package for 2.x
+      // Try exact version first, then find closest if not available
       actualTypesVersion = version;
 
       typeFiles = isInstanceMode
@@ -203,6 +264,28 @@ export async function downloadTypeDefinitions(version, targetDir, spinner = null
             { name: 'global.d.ts', url: `${cdnBase}/p5@${version}/types/global.d.ts` },
             { name: 'p5.d.ts', url: `${cdnBase}/p5@${version}/types/p5.d.ts` }
           ];
+
+      // Test if types exist for this version
+      const testResponse = await fetch(typeFiles[0].url);
+      if (!testResponse.ok) {
+        // Types not available for this version, find closest
+        const { versions } = await fetchVersions();
+        const matchedVersion = findClosestVersion(version, versions);
+
+        if (!matchedVersion) {
+          throw new Error(`No compatible p5.js version with bundled types found for ${version}`);
+        }
+
+        actualTypesVersion = matchedVersion;
+
+        // Update URLs to use matched version
+        typeFiles = isInstanceMode
+          ? [{ name: 'p5.d.ts', url: `${cdnBase}/p5@${matchedVersion}/types/p5.d.ts` }]
+          : [
+              { name: 'global.d.ts', url: `${cdnBase}/p5@${matchedVersion}/types/global.d.ts` },
+              { name: 'p5.d.ts', url: `${cdnBase}/p5@${matchedVersion}/types/p5.d.ts` }
+            ];
+      }
     }
 
     // Download and write all type definition files
