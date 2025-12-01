@@ -106,8 +106,11 @@ The `version.js` module:
 - Latest version accessed via `data.tags.latest`
 - All versions accessed via `data.versions` array
 - Shows latest 15 versions in interactive mode
-- Supports version matching for TypeScript definitions from `@types/p5` using same API
 - Downloads p5.js files from jsdelivr CDN when using local mode
+- Uses a **two-tier strategy** for TypeScript definitions:
+  - **p5.js 1.x**: Downloads from `@types/p5@1.7.7` package (DefinitelyTyped)
+  - **p5.js 2.x (2.0.2+)**: Downloads bundled types from p5 package itself
+  - **p5.js 2.0.0-2.0.1**: Falls back to `@types/p5@1.7.7` (bundled types not yet available)
 
 ## Development Workflow
 
@@ -257,19 +260,12 @@ const versions = data.versions;  // Array of version strings
 const latest = data.tags.latest;  // Latest stable version
 ```
 
-**Fetching TypeScript Definitions:**
-```javascript
-// Get all versions for @types/p5 from https://cdn.jsdelivr.net/npm/p5@{version}/types/global.d.ts
-const response = await fetch(`${cdnUrl}/p5@${version}/types/global.d.ts`);
-const data = await response.json();
-const typeVersions = data.versions;
-```
-
-**Methods:**
-- `getVersions()` - Returns all available p5.js versions
-- `getLatest()` - Returns the latest stable version
-- `getVersionsForPackage(packageName)` - Generic method for any npm package
-- `getLatestForPackage(packageName)` - Gets latest version for any package
+**Key Methods:**
+- `fetchVersions(includePrerelease)` - Returns all available p5.js versions
+- `parseVersion(version)` - Parses semver string into components (major, minor, patch, prerelease)
+- `getTypesStrategy(version)` - Determines whether to use @types/p5 or bundled types
+- `downloadP5Files(version, targetDir, spinner)` - Downloads p5.js library files for local mode
+- `downloadTypeDefinitions(version, targetDir, spinner, template)` - Downloads TypeScript definitions using two-tier strategy
 
 ### FileManager Implementation Details
 
@@ -302,6 +298,32 @@ if (response.ok) {
 - Graceful error handling (returns false/empty array instead of throwing where appropriate)
 - UTF-8 encoding by default
 
+### TypeScript Type Definitions Strategy
+
+The tool uses a **two-tier strategy** for downloading TypeScript definitions based on p5.js version:
+
+**For p5.js 1.x (and 2.0.0-2.0.1):**
+Use `@types/p5@1.7.7` from DefinitelyTyped:
+```
+https://cdn.jsdelivr.net/npm/@types/p5@1.7.7/global.d.ts  # For global mode
+https://cdn.jsdelivr.net/npm/@types/p5@1.7.7/index.d.ts   # For instance mode
+```
+
+**For p5.js 2.x (starting from 2.0.2):**
+Use bundled types from p5 package itself:
+```
+https://cdn.jsdelivr.net/npm/p5@{version}/types/global.d.ts  # For global mode
+https://cdn.jsdelivr.net/npm/p5@{version}/types/p5.d.ts      # For instance mode
+```
+
+**Implementation:**
+- `getTypesStrategy(version)` determines which strategy to use
+- Returns `{ useTypesPackage: boolean, reason: string }`
+- `downloadTypeDefinitions()` uses this strategy to download correct files
+- Stores actual types version in `typeDefsVersion` field of `p5-config.json`
+
+See `docs/TYPES_VERSION_STRATEGY.md` for detailed documentation of the version matching logic.
+
 ### Download URLs for Local Mode
 
 When downloading p5.js files for local mode, use the jsdelivr CDN:
@@ -311,16 +333,6 @@ When downloading p5.js files for local mode, use the jsdelivr CDN:
 https://cdn.jsdelivr.net/npm/p5@{version}/lib/p5.js
 https://cdn.jsdelivr.net/npm/p5@{version}/lib/p5.min.js
 ```
-
-**TypeScript type definitions:**
-```
-https://cdn.jsdelivr.net/npm/p5@{version}/types/global.d.ts
-```
-
-Note: TypeScript types may not exist for all p5.js versions. The tool should:
-1. Try to download types for the exact p5.js version
-2. Fall back to the latest available @types/p5 version if exact match not found
-3. Store the actual downloaded version in `typeDefsVersion` config field
 
 ### Usage Patterns
 ```bash
