@@ -1,4 +1,4 @@
-# create-p5
+# create-p5js
 
 A scaffolding tool for quickly creating and managing [p5.js](https://p5js.org/) projects using the `npm create` convention. It provides both interactive and non-interactive modes for project creation, along with utilities to update existing projects safely.
 
