@@ -4,6 +4,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
+import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
 
 /**
  * Copies all files from a template directory to a target directory.
@@ -268,4 +269,18 @@ export function validateVersion(version, availableVersions, latest) {
   }
 
   return null;
+}
+
+/**
+ * Generates a random, memorable project name using adjectives and animals
+ * @returns {string} A random project name (e.g., 'brave-elephant', 'blue-tiger')
+ */
+export function generateProjectName() {
+  const useColor = Math.random() < 0.5;
+  const config = {
+    dictionaries: useColor ? [colors, animals] : [adjectives, animals],
+    separator: '-',
+    style: 'lowerCase'
+  };
+  return uniqueNamesGenerator(config);
 }

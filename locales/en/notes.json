@@ -1,0 +1,51 @@
+{
+  "note.projectSummary.title": "Project Summary",
+  "note.projectSummary.name": "Name:     {name}",
+  "note.projectSummary.template": "Template: {template}",
+  "note.projectSummary.version": "p5.js:    {version}",
+  "note.projectSummary.mode": "Mode:     {mode}",
+  "note.projectSummary.types": "Types:    {version}",
+  "note.projectSummary.git": "Git:      initialized",
+
+  "note.nextSteps.title": "Next Steps",
+  "note.nextSteps.step1": "1. cd {projectName}",
+  "note.nextSteps.step2": "2. Open index.html in your browser",
+  "note.nextSteps.documentation": "Documentation:",
+  "note.nextSteps.reference": "• p5.js reference: https://p5js.org/reference/",
+  "note.nextSteps.examples": "• Examples: https://p5js.org/examples/",
+  "note.nextSteps.update": "• Update project: npx create-p5 update",
+
+  "note.typescriptTips.title": "TypeScript Tips",
+  "note.typescriptTips.editor": "• Use a TypeScript-aware editor like VS Code",
+  "note.typescriptTips.install": "• Install TypeScript: npm install -g typescript",
+  "note.typescriptTips.compile": "• Compile: tsc sketch.ts",
+
+  "note.instanceTips.title": "Instance Mode Tips",
+  "note.instanceTips.multiple": "• Multiple sketches can run on the same page",
+  "note.instanceTips.usage": "• Use new p5(sketch, container) to create instances",
+
+  "note.gitTips.title": "Git Tips",
+  "note.gitTips.firstCommit": "• Make your first commit: git add . && git commit -m \"Initial commit\"",
+  "note.gitTips.libIgnored": "• lib/ directory is already in .gitignore",
+
+  "note.update.currentConfig.title": "Current project configuration",
+  "note.update.currentConfig.version": "p5.js version: {version}",
+  "note.update.currentConfig.mode": "Delivery mode: {mode}",
+  "note.update.currentConfig.template": "Template: {template}",
+  "note.update.currentConfig.types": "TypeScript definitions: {version}",
+  "note.update.currentConfig.typesNone": "TypeScript definitions: none",
+  "note.update.currentConfig.lastUpdated": "Last updated: {timestamp}",
+
+  "note.update.versionSummary.title": "Summary of changes",
+  "note.update.versionSummary.oldVersion": "Old version: {oldVersion}",
+  "note.update.versionSummary.newVersion": "New version: {newVersion}",
+  "note.update.versionSummary.types": "TypeScript definitions: {types}",
+
+  "note.success.created": "✓ Project created successfully!",
+  "note.success.updated": "✓ Project updated successfully!",
+  "note.success.failed": "✗ Project creation failed",
+
+  "note.verbose.remoteTemplateSpec": "  Remote template spec: {spec}",
+  "note.verbose.targetPath": "  Target path: {path}",
+  "note.verbose.templatePath": "  Template path: {path}"
+}

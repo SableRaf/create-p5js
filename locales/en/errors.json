@@ -1,0 +1,27 @@
+{
+  "error.existingProject.detected": "Existing p5.js project detected (p5-config.json found).",
+  "error.existingProject.alreadyProject": "This directory is already a create-p5 project.",
+  "error.existingProject.updateHint": "To update this project, use:",
+  "error.existingProject.updateCommand": "  npx create-p5 update",
+
+  "error.directoryExists": "Directory \"{path}\" already exists.",
+  "error.directoryExistsSuggestion": "Suggestion: Choose a different path or remove the existing directory.",
+  "error.currentDirNotEmpty": "Current directory is not empty.",
+  "error.currentDirSuggestion": "Suggestion: Use a subdirectory or clean the current directory first.",
+
+  "error.fetchVersions.failed": "Failed to fetch p5.js versions",
+  "error.fetchVersions.troubleshooting": "Troubleshooting:",
+  "error.fetchVersions.step1": "  1. Check your internet connection",
+  "error.fetchVersions.step2": "  2. Verify that https://data.jsdelivr.com is accessible",
+  "error.fetchVersions.step3": "  3. Try again in a few moments",
+
+  "error.fetchTemplate": "Failed to fetch remote template \"{template}\": {error}",
+  "error.cleanup": "Cleaning up...",
+
+  "error.persistHelp.title": "If the problem persists:",
+  "error.persistHelp.verbose": "• Try with --verbose flag for detailed output",
+  "error.persistHelp.permissions": "• Check write permissions in the current directory",
+  "error.persistHelp.issues": "• Report issues at https://github.com/sableraf/create-p5/issues",
+
+  "error.update.noConfig": "No p5-config.json found. This does not appear to be a create-p5 project."
+}

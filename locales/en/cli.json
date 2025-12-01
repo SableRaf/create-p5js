@@ -1,0 +1,5 @@
+{
+  "cli.brand": "create-p5",
+  "cli.intro": " create-p5 ",
+  "cli.help.usage": "\ncreate-p5 - Scaffolding tool for p5.js projects\n\nUSAGE:\n  npm create p5@latest [project-name] [options]\n  npx create-p5 [project-name] [options]\n  npx create-p5 update\n\nOPTIONS:\n  -t, --template <name>    Template to use (basic, instance, typescript, empty)\n  -v, --version <version>  p5.js version to use (e.g., 2.1.1 or latest)\n  -m, --mode <mode>        Delivery mode (cdn or local)\n  -g, --git                Initialize git repository\n  -y, --yes                Skip prompts and use defaults\n  -p, --include-prerelease Include pre-release versions (RC, beta, alpha)\n      --no-types           Skip TypeScript definitions download\n      --verbose            Show detailed logging\n  -h, --help               Show this help message\n\nEXAMPLES:\n  npm create p5@latest my-sketch\n  npm create p5@latest my-sketch -- --template typescript --mode cdn --git\n  npm create p5@latest -- --yes\n  npm create p5@latest -- --include-prerelease\n  npx create-p5 update\n"
+}

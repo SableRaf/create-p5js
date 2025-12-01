@@ -1,15 +1,22 @@
 /**
  * Update module - Handles version updates and mode switching for existing p5.js projects
+ * Philosophy: Business logic only, NO inline copy
+ * All UI text comes from i18n layer
  */
 
 import path from 'path';
 import minimist from 'minimist';
-import { readConfig, createConfig } from './config.js';
-import { fetchVersions, downloadP5Files, downloadTypeDefinitions } from './version.js';
-import { selectVersion } from './prompts.js';
-import { injectP5Script } from './htmlManager.js';
-import * as p from '@clack/prompts';
-import { createDirectory, readFile, writeFile, fileExists, removeDirectory } from './utils.js';
+import { readConfig, createConfig } from '../config.js';
+import { fetchVersions, downloadP5Files, downloadTypeDefinitions } from '../version.js';
+import { injectP5Script } from '../htmlManager.js';
+import { createDirectory, readFile, writeFile, fileExists, removeDirectory } from '../utils.js';
+
+// i18n
+import { t } from '../i18n/index.js';
+
+// UI primitives
+import * as display from '../ui/display.js';
+import * as prompts from '../ui/prompts.js';
 
 /**
  * Main update function - Entry point for updating existing projects
@@ -32,46 +39,34 @@ export async function update(projectDir = process.cwd()) {
   const config = await readConfig(configPath);
 
   if (!config) {
-    p.log.error('No p5-config.json found. This does not appear to be a create-p5 project.');
+    display.error('error.update.noConfig');
     process.exit(1);
     return; // defensive: ensure function doesn't continue if exit is mocked
   }
 
   // Display current project state
   if (config) {
-    const configInfo =
-      `p5.js version: ${config.version}\n` +
-      `Delivery mode: ${config.mode}\n` +
-      `Template: ${config.template}\n` +
-      `TypeScript definitions: ${config.typeDefsVersion || 'none'}\n` +
-      `Last updated: ${config.lastUpdated}`;
-    p.note(configInfo, 'Current project configuration');
+    const configLines = [
+      'note.update.currentConfig.version',
+      'note.update.currentConfig.mode',
+      'note.update.currentConfig.template',
+      config.typeDefsVersion ? 'note.update.currentConfig.types' : 'note.update.currentConfig.typesNone',
+      'note.update.currentConfig.lastUpdated'
+    ];
+    display.note(configLines, 'note.update.currentConfig.title', {
+      version: config.version,
+      mode: config.mode,
+      template: config.template,
+      types: config.typeDefsVersion,
+      timestamp: config.lastUpdated
+    });
   }
 
   // Show update options
-  const action = await p.select({
-    message: 'What would you like to update?',
-    options: [
-      {
-        value: 'version',
-        label: 'Update p5.js version',
-        hint: 'Change to a different version of p5.js'
-      },
-      {
-        value: 'mode',
-        label: 'Switch delivery mode',
-        hint: 'Switch between CDN and local file delivery'
-      },
-      {
-        value: 'cancel',
-        label: 'Cancel',
-        hint: 'Exit without making changes'
-      }
-    ]
-  });
+  const action = await prompts.promptUpdateAction();
 
   if (action === 'cancel') {
-    p.log.info('Update cancelled.');
+    display.info('info.update.cancelled');
     return;
   }
 
@@ -99,19 +94,19 @@ async function updateVersion(projectDir, config, options = {}) {
   const { latest, versions } = await fetchVersions(includePrerelease);
 
   if (includePrerelease && verbose) {
-    p.log.info('Including pre-release versions (RC, beta, alpha)');
+    display.info('info.includePrerelease');
   }
 
   // Let user select new version
-  const newVersion = await selectVersion(versions, latest);
+  const newVersion = await prompts.promptVersion(versions, latest);
 
   if (newVersion === config.version) {
-    p.log.info('Selected version is the same as current version. No changes made.');
+    display.info('info.update.sameVersion');
     return;
   }
 
   if (verbose) {
-    p.log.info(`Updating from version ${config.version} to ${newVersion}...`);
+    display.info('info.update.updating', { oldVersion: config.version, newVersion });
   }
 
   // Update based on delivery mode
@@ -121,7 +116,7 @@ async function updateVersion(projectDir, config, options = {}) {
     await createDirectory(libPath);
     await downloadP5Files(newVersion, libPath);
     if (verbose) {
-      p.log.success('Downloaded new p5.js files to lib/');
+      display.success('info.update.downloadedFiles');
     }
   }
 
@@ -131,7 +126,7 @@ async function updateVersion(projectDir, config, options = {}) {
   const updatedHtml = injectP5Script(htmlContent, newVersion, config.mode);
   await writeFile(indexPath, updatedHtml);
   if (verbose) {
-    p.log.success('Updated script tag in index.html');
+    display.success('info.update.updatedScript');
   }
 
   // Update TypeScript definitions
@@ -139,7 +134,7 @@ async function updateVersion(projectDir, config, options = {}) {
   await createDirectory(typesPath);
   const typeDefsVersion = await downloadTypeDefinitions(newVersion, typesPath, null, config.template);
   if (verbose) {
-    p.log.success(`Updated TypeScript definitions to version ${typeDefsVersion}`);
+    display.success('info.update.updatedTypes', { version: typeDefsVersion });
   }
 
   // Update p5-config.json
@@ -151,11 +146,18 @@ async function updateVersion(projectDir, config, options = {}) {
     typeDefsVersion
   });
 
-  const updateSummary =
-    `Old version: ${config.version}\n` +
-    `New version: ${newVersion}\n` +
-    `TypeScript definitions: ${typeDefsVersion}`;
-  p.note(updateSummary, 'Version updated successfully!');
+  const summaryLines = [
+    'note.update.versionSummary.oldVersion',
+    'note.update.versionSummary.newVersion',
+    'note.update.versionSummary.types'
+  ];
+  display.note(summaryLines, 'note.update.versionSummary.title', {
+    oldVersion: config.version,
+    newVersion: newVersion,
+    types: typeDefsVersion
+  });
+
+  display.outro(t('note.success.updated'));
 }
 
 /**
@@ -172,7 +174,7 @@ async function switchMode(projectDir, config, options = {}) {
   const newMode = currentMode === 'cdn' ? 'local' : 'cdn';
 
   if (verbose) {
-    p.log.info(`Switching from ${currentMode} to ${newMode} mode...`);
+    display.info('info.update.switchingMode', { oldMode: currentMode, newMode });
   }
 
   if (newMode === 'local') {
@@ -181,7 +183,7 @@ async function switchMode(projectDir, config, options = {}) {
     await createDirectory(libPath);
     await downloadP5Files(config.version, libPath);
     if (verbose) {
-      p.log.success('Downloaded p5.js files to lib/');
+      display.success('info.update.downloadedFiles');
     }
 
     // Update .gitignore to exclude lib/ directory
@@ -195,28 +197,25 @@ async function switchMode(projectDir, config, options = {}) {
     if (!gitignoreContent.includes('lib/')) {
       await writeFile(gitignorePath, gitignoreContent + '\n# Local p5.js files\nlib/\n');
       if (verbose) {
-        p.log.success('Updated .gitignore to exclude lib/');
+        display.success('info.update.updatedGitignore');
       }
     }
   } else {
     // Local → CDN: Prompt user about lib/ directory
-    const shouldDelete = await p.confirm({
-      message: 'Delete the local lib/ directory?',
-      initialValue: false
-    });
+    const shouldDelete = await prompts.confirmDeleteLib();
 
     if (shouldDelete) {
       const libPath = path.join(projectDir, 'lib');
       try {
         await removeDirectory(libPath);
         if (verbose) {
-          p.log.success('Deleted lib/ directory');
+          display.success('info.update.deletedLib');
         }
       } catch (error) {
-        p.log.info('lib/ directory not found or already deleted');
+        display.info('info.update.libNotFound');
       }
     } else {
-      p.log.info('lib/ directory kept (you can delete it manually)');
+      display.info('info.update.libKept');
     }
   }
 
@@ -226,7 +225,7 @@ async function switchMode(projectDir, config, options = {}) {
   const updatedHtml = injectP5Script(htmlContent, config.version, newMode);
   await writeFile(indexPath, updatedHtml);
   if (verbose) {
-    p.log.success('Updated script tag in index.html');
+    display.success('info.update.updatedScript');
   }
 
   // Update p5-config.json
@@ -238,5 +237,7 @@ async function switchMode(projectDir, config, options = {}) {
     typeDefsVersion: config.typeDefsVersion
   });
 
-  p.log.success(`Delivery mode updated from ${currentMode} to ${newMode}`);
+  display.success('info.update.modeUpdated', { oldMode: currentMode, newMode });
+
+  display.outro(t('note.success.updated'));
 }

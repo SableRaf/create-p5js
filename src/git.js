@@ -29,7 +29,7 @@ export async function initGit(projectDir) {
   // Check if git is installed
   const gitInstalled = await isGitInstalled();
   if (!gitInstalled) {
-    console.log('⚠️  Git not found on system, skipping git initialization');
+    // Silently skip if git not installed - caller handles messaging
     return;
   }
 
@@ -52,8 +52,6 @@ export async function initGit(projectDir) {
 
   // Create .gitignore file
   await createGitignore(projectDir);
-
-  console.log('✓ Initialized git repository');
 }
 
 /**
