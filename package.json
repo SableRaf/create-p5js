@@ -16,8 +16,16 @@
     "creative-coding",
     "npm-create"
   ],
-  "author": "",
+  "author": "Raphaël de Courville <raphael.de.courville@gmail.com>",
   "license": "LGPL-2.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sableraf/create-p5.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sableraf/create-p5/issues"
+  },
+  "homepage": "https://github.com/sableraf/create-p5#readme",
   "scripts": {
     "test": "vitest run",
     "test:coverage": "vitest --coverage --run",

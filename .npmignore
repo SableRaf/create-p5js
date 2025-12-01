@@ -1,0 +1,17 @@
+tests/
+docs/
+.github/
+*.log
+.DS_Store
+coverage/
+.vscode/
+.claude/
+images/
+.gitattributes
+.gitignore
+*.tgz
+*.md.backup
+.eslintrc*
+.prettierrc*
+vitest.config.*
+CLAUDE.md
