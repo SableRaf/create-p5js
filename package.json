@@ -19,7 +19,7 @@
   "author": "",
   "license": "LGPL-2.1",
   "scripts": {
-    "test": "vitest",
+    "test": "vitest run",
     "test:coverage": "vitest --coverage --run",
     "run": "node ./index.js"
   },
