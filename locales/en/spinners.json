@@ -1,0 +1,26 @@
+{
+  "spinner.fetchingVersions": "Fetching p5.js versions",
+  "spinner.fetchedVersions": "✓ Fetched available p5.js versions",
+  "spinner.failedVersions": "✗ Failed to fetch versions",
+
+  "spinner.copyingTemplate": "Copying template files",
+  "spinner.copiedTemplate": "✓ Copied template files",
+
+  "spinner.fetchingRemoteTemplate": "Fetching remote template",
+  "spinner.fetchedRemoteTemplate": "✓ Fetched remote template",
+  "spinner.failedRemoteTemplate": "✗ Failed to fetch remote template",
+
+  "spinner.initializingGit": "Initializing git repository",
+  "spinner.initializedGit": "✓ Initialized git repository",
+
+  "spinner.downloadingP5File": "Downloading {filename}...",
+  "spinner.downloadedP5": "p5.js files downloaded successfully",
+  "spinner.failedP5": "Failed to download p5.js files",
+
+  "spinner.downloadingTypes": "Downloading TypeScript definitions...",
+  "spinner.downloadedTypes": "TypeScript definitions downloaded (v{version})",
+  "spinner.failedTypes": "Failed to download TypeScript definitions",
+
+  "spinner.cleaningUp": "Cleaning up incomplete project directory",
+  "spinner.cleanedUp": "✓ Cleaned up incomplete project"
+}

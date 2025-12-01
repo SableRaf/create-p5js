@@ -1,4 +1,5 @@
 import { writeFile } from './utils.js';
+import { t } from './i18n/index.js';
 
 /**
  * Checks if a version string is a stable release (semver compliant: X.Y.Z)
@@ -73,7 +74,7 @@ export async function downloadP5Files(version, targetDir, spinner = null) {
   try {
     for (const file of files) {
       if (spinner) {
-        spinner.message(`Downloading ${file.name}...`);
+        spinner.message(t('spinner.downloadingP5File', { filename: file.name }));
       }
 
       const response = await fetch(file.url);
@@ -88,11 +89,11 @@ export async function downloadP5Files(version, targetDir, spinner = null) {
     }
 
     if (spinner) {
-      spinner.stop(`p5.js files downloaded successfully`);
+      spinner.stop(t('spinner.downloadedP5'));
     }
   } catch (error) {
     if (spinner) {
-      spinner.stop(`Failed to download p5.js files`);
+      spinner.stop(t('spinner.failedP5'));
     }
 
     if (error.message.includes('fetch failed') || error.code === 'ENOTFOUND') {
@@ -129,7 +130,7 @@ export async function downloadTypeDefinitions(version, targetDir, spinner = null
 
   try {
     if (spinner) {
-      spinner.message('Downloading TypeScript definitions...');
+      spinner.message(t('spinner.downloadingTypes'));
     }
 
     // Try to download the exact version first
@@ -161,14 +162,14 @@ export async function downloadTypeDefinitions(version, targetDir, spinner = null
       }
 
       if (spinner) {
-        spinner.stop(`TypeScript definitions downloaded (v${actualVersion})`);
+        spinner.stop(t('spinner.downloadedTypes', { version: actualVersion }));
       }
     }
 
     return actualVersion;
   } catch (error) {
     if (spinner) {
-      spinner.stop('Failed to download TypeScript definitions');
+      spinner.stop(t('spinner.failedTypes'));
     }
 
     if (error.message.includes('fetch failed') || error.code === 'ENOTFOUND') {

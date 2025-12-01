@@ -1,0 +1,37 @@
+{
+  "prompt.projectPath.message": "Where should we create your p5.js sketch?",
+  "prompt.projectPath.placeholder": ". (current directory)",
+  "prompt.projectPath.error.absolutePath": "Please use a relative path (e.g., \"./my-sketch\" or \"my-sketch\")",
+  "prompt.projectPath.error.invalidChars": "Path contains invalid characters",
+
+  "prompt.template.message": "Select template:",
+  "prompt.template.option.basic.label": "Basic",
+  "prompt.template.option.basic.hint": "Standard p5.js with global mode (recommended for beginners)",
+  "prompt.template.option.instance.label": "Instance Mode",
+  "prompt.template.option.instance.hint": "Multiple sketches on one page, avoids global namespace",
+  "prompt.template.option.typescript.label": "TypeScript",
+  "prompt.template.option.typescript.hint": "TypeScript setup with type definitions",
+  "prompt.template.option.empty.label": "Empty",
+  "prompt.template.option.empty.hint": "Minimal HTML only, build your own structure",
+
+  "prompt.version.message": "Select p5.js version:",
+  "prompt.version.latestLabel": "{version} (latest)",
+
+  "prompt.mode.message": "Select delivery mode:",
+  "prompt.mode.option.cdn.label": "CDN",
+  "prompt.mode.option.cdn.hint": "Load p5.js from jsdelivr CDN (recommended for most users)",
+  "prompt.mode.option.local.label": "Local",
+  "prompt.mode.option.local.hint": "Download p5.js files to your project (works offline)",
+
+  "prompt.update.action.message": "What would you like to update?",
+  "prompt.update.action.option.version.label": "Update p5.js version",
+  "prompt.update.action.option.version.hint": "Change to a different version of p5.js",
+  "prompt.update.action.option.mode.label": "Switch delivery mode",
+  "prompt.update.action.option.mode.hint": "Switch between CDN and local file delivery",
+  "prompt.update.action.option.cancel.label": "Cancel",
+  "prompt.update.action.option.cancel.hint": "Exit without making changes",
+
+  "prompt.update.deleteLib.message": "Delete the local lib/ directory?",
+
+  "prompt.cancel.sketchCreation": "You cancelled the sketch creation"
+}
