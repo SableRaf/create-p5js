@@ -4,7 +4,7 @@
   "description": "Scaffolding tool for p5.js projects",
   "type": "module",
   "bin": {
-    "create-p5": "./index.js"
+    "create-p5": "index.js"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -20,7 +20,7 @@
   "license": "LGPL-2.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sableraf/create-p5.git"
+    "url": "git+https://github.com/sableraf/create-p5.git"
   },
   "bugs": {
     "url": "https://github.com/sableraf/create-p5/issues"
