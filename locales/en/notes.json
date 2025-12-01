@@ -36,7 +36,7 @@
   "note.update.currentConfig.typesNone": "TypeScript definitions: none",
   "note.update.currentConfig.lastUpdated": "Last updated: {timestamp}",
 
-  "note.update.versionSummary.title": "Version updated successfully!",
+  "note.update.versionSummary.title": "Summary of changes",
   "note.update.versionSummary.oldVersion": "Old version: {oldVersion}",
   "note.update.versionSummary.newVersion": "New version: {newVersion}",
   "note.update.versionSummary.types": "TypeScript definitions: {types}",
