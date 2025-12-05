@@ -328,7 +328,7 @@ export async function downloadTypeDefinitions(version, targetDir, spinner = null
           ];
     } else {
       // Use bundled types from p5 package for 2.x
-      // Try exact version first, then find closest if not available
+      // Try exact version first
       actualTypesVersion = version;
 
       typeFiles = isInstanceMode
@@ -338,25 +338,64 @@ export async function downloadTypeDefinitions(version, targetDir, spinner = null
             { name: 'p5.d.ts', url: `${cdnBase}/p5@${version}/types/p5.d.ts` }
           ];
 
-      // Test if types exist for this version
+      // Test if types exist for this exact version
       const testResponse = await fetch(typeFiles[0].url);
       if (!testResponse.ok) {
-        // Types not available for this version, find closest
+        // Types not available for this version - need to select alternative
         const { versions } = await fetchVersions();
-        const matchedVersion = findClosestVersion(version, versions);
 
-        if (!matchedVersion) {
+        // Filter to only 2.x versions
+        const v2Versions = versions.filter(v => {
+          try {
+            const parsed = parseVersion(v);
+            return parsed.major === 2;
+          } catch {
+            return false;
+          }
+        });
+
+        const recommendedVersion = findClosestVersion(version, v2Versions);
+
+        if (!recommendedVersion) {
           throw new Error(`No compatible p5.js version with bundled types found for ${version}`);
         }
 
-        actualTypesVersion = matchedVersion;
+        if (isInteractive) {
+          // Prompt user to select version
+          if (spinner) {
+            spinner.stop();
+          }
 
-        // Update URLs to use matched version
+          const selectedVersion = await prompts.promptTypesVersion(
+            v2Versions,
+            version,
+            recommendedVersion,
+            'bundled'
+          );
+
+          if (prompts.isCancel(selectedVersion)) {
+            display.cancel('prompt.cancel.typesSelection');
+            return null;
+          }
+
+          actualTypesVersion = selectedVersion;
+
+          // Restart spinner if it was provided
+          if (spinner) {
+            spinner = display.spinner('spinner.downloadingTypes');
+          }
+        } else {
+          // Non-interactive mode: use recommended version
+          actualTypesVersion = recommendedVersion;
+          // TODO: Add warning message in Stage 7
+        }
+
+        // Update URLs to use selected/matched version
         typeFiles = isInstanceMode
-          ? [{ name: 'p5.d.ts', url: `${cdnBase}/p5@${matchedVersion}/types/p5.d.ts` }]
+          ? [{ name: 'p5.d.ts', url: `${cdnBase}/p5@${actualTypesVersion}/types/p5.d.ts` }]
           : [
-              { name: 'global.d.ts', url: `${cdnBase}/p5@${matchedVersion}/types/global.d.ts` },
-              { name: 'p5.d.ts', url: `${cdnBase}/p5@${matchedVersion}/types/p5.d.ts` }
+              { name: 'global.d.ts', url: `${cdnBase}/p5@${actualTypesVersion}/types/global.d.ts` },
+              { name: 'p5.d.ts', url: `${cdnBase}/p5@${actualTypesVersion}/types/p5.d.ts` }
             ];
       }
     }
