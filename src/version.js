@@ -351,7 +351,7 @@ export async function downloadP5Files(version, targetDir, spinner = null) {
 
       const content = await response.text();
       const targetPath = `${targetDir}/${file.name}`;
-      await writeFile(targetPath, content, 'utf-8');
+      await writeFile(targetPath, content);
     }
 
     if (spinner) {
@@ -579,7 +579,7 @@ export async function downloadTypeDefinitions(p5Version, typesVersion, targetDir
 
       const content = await fileResponse.text();
       const targetPath = `${targetDir}/${file.name}`;
-      await writeFile(targetPath, content, 'utf-8');
+      await writeFile(targetPath, content);
     }
 
     if (spinner) {
