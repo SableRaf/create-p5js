@@ -315,7 +315,10 @@ export async function downloadTypeDefinitions(version, targetDir, spinner = null
         } else {
           // Non-interactive mode: use recommended version
           actualTypesVersion = recommendedVersion;
-          // TODO: Add warning message in Stage 7
+          display.info('info.autoSelectedTypes', {
+            p5Version: version,
+            typesVersion: recommendedVersion
+          });
         }
       }
 
@@ -387,7 +390,10 @@ export async function downloadTypeDefinitions(version, targetDir, spinner = null
         } else {
           // Non-interactive mode: use recommended version
           actualTypesVersion = recommendedVersion;
-          // TODO: Add warning message in Stage 7
+          display.info('info.autoSelectedTypes', {
+            p5Version: version,
+            typesVersion: recommendedVersion
+          });
         }
 
         // Update URLs to use selected/matched version
