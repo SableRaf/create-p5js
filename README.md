@@ -6,7 +6,7 @@ Setting up a p5.js project from scratch is not very hard, but if you do it often
 
 Simply put: spend less time configuring your project and more time creative coding with p5.js 🌸
 
-## Scaffolding Your First p5.js Project
+## Creating Your First p5.js Project
 
 With NPM:
 
@@ -45,6 +45,8 @@ deno init --npm p5js
 ```
 
 Then follow the prompts to set up your new p5.js project.
+
+## Using Command Line Options
 
 You can also directly specify the project name and the template you want to use via additional command line options. For example, to scaffold a p5.js + TypeScript project, run:
 
