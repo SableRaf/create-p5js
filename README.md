@@ -128,7 +128,7 @@ This uses [degit](https://github.com/Rich-Harris/degit) to clone the template re
 
 ## Acknowledgment
 
-This project builds upon the work of the p5.js community. Thanks to all contributors and maintainers of p5.js. Thanks also to @nbogie and @davepagurek for their suggestions and feedback.
+This project builds upon the work of the p5.js community. Thanks to all contributors and maintainers of p5.js. Thanks also to [@nbogie](https://github.com/nbogie) and [@davepagurek](https://github.com/davepagurek) for their suggestions and feedback.
 
 ## Warnings
 
