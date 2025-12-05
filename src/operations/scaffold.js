@@ -312,12 +312,14 @@ export async function scaffold(args) {
       const typesPath = path.join(targetPath, 'types');
       await fs.mkdir(typesPath, { recursive: true });
       try {
+        const isInteractive = !args.yes;
         if (args.verbose) {
           const typesSpinner = display.spinner('spinner.downloadingTypes');
-          typeDefsVersion = await downloadTypeDefinitions(selectedVersion, typesPath, typesSpinner, selectedTemplate);
+          typeDefsVersion = await downloadTypeDefinitions(selectedVersion, typesPath, typesSpinner, selectedTemplate, isInteractive);
         } else {
-          typeDefsVersion = await downloadTypeDefinitions(selectedVersion, typesPath, null, selectedTemplate);
+          typeDefsVersion = await downloadTypeDefinitions(selectedVersion, typesPath, null, selectedTemplate, isInteractive);
         }
+        // typeDefsVersion will be null if user cancelled the selection
       } catch (error) {
         display.warn('error.fetchVersions.failed');
         display.message(error.message);
