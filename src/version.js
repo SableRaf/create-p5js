@@ -56,55 +56,114 @@ export async function fetchTypesVersions() {
 }
 
 /**
- * Finds the closest matching version from available versions
- * Prioritizes exact major.minor match, then closest minor within same major
- * @param {string} targetVersion - The target version to match (e.g., "1.4.0")
+ * Converts a parsed version object into a flattened integer for distance calculation
+ * Uses padding to handle multi-digit version components correctly
+ * @param {{ major: number, minor: number, patch: number }} v - Parsed version object
+ * @returns {number} Flattened version as integer (e.g., {1, 7, 9} -> 10709)
+ */
+function flattenVersion(v) {
+  return v.major * 10000 + v.minor * 100 + v.patch;
+}
+
+/**
+ * Finds the closest matching version from available versions using distance-based fallback
+ * Rules:
+ * 1. Only compares versions with the same MAJOR
+ * 2. If exact match exists, returns it
+ * 3. If versions with same MINOR exist, picks closest by PATCH distance (higher patch wins ties)
+ * 4. If no same MINOR, uses flattened distance on entire version (higher version wins ties)
+ * @param {string} targetVersion - The target version to match (e.g., "1.7.9")
  * @param {string[]} availableVersions - Array of available versions to search
  * @returns {string|null} The closest matching version, or null if none found
  */
 export function findClosestVersion(targetVersion, availableVersions) {
   const target = parseVersion(targetVersion);
+
+  // Parse all available versions and filter valid ones
   const candidates = availableVersions
     .map(v => {
       try {
-        return parseVersion(v);
+        return { version: v, parsed: parseVersion(v) };
       } catch {
         return null;
       }
     })
     .filter(v => v !== null);
 
-  // Filter to same major version
-  const sameMajor = candidates.filter(v => v.major === target.major);
+  // 1) Filter by same major
+  const sameMajor = candidates.filter(c => c.parsed.major === target.major);
   if (sameMajor.length === 0) return null;
 
-  // Try exact major.minor match first
-  const sameMinor = sameMajor.filter(v => v.minor === target.minor);
-  if (sameMinor.length > 0) {
-    // Return lowest patch in same major.minor (closest to target)
-    sameMinor.sort((a, b) => a.patch - b.patch);
-    return `${sameMinor[0].major}.${sameMinor[0].minor}.${sameMinor[0].patch}`;
+  // 2) Check for exact match
+  for (const candidate of sameMajor) {
+    const p = candidate.parsed;
+    if (p.minor === target.minor && p.patch === target.patch) {
+      return candidate.version;
+    }
   }
 
-  // Find closest minor version
-  sameMajor.sort((a, b) => Math.abs(a.minor - target.minor) - Math.abs(b.minor - target.minor));
-  const closest = sameMajor[0];
-  return `${closest.major}.${closest.minor}.${closest.patch}`;
+  // 3) Same-minor case: compare by patch distance
+  const sameMinor = sameMajor.filter(c => c.parsed.minor === target.minor);
+
+  if (sameMinor.length > 0) {
+    let best = null;
+    let bestDistance = Infinity;
+
+    for (const candidate of sameMinor) {
+      const p = candidate.parsed;
+      const distance = Math.abs(p.patch - target.patch);
+
+      if (
+        distance < bestDistance ||
+        (distance === bestDistance && p.patch > best.parsed.patch)
+      ) {
+        best = candidate;
+        bestDistance = distance;
+      }
+    }
+
+    return best.version;
+  }
+
+  // 4) No same minor: use flattened distance
+  const flatTarget = flattenVersion(target);
+
+  let best = null;
+  let bestDistance = Infinity;
+  let bestFlat = -Infinity;
+
+  for (const candidate of sameMajor) {
+    const p = candidate.parsed;
+    const flat = flattenVersion(p);
+    const distance = Math.abs(flat - flatTarget);
+
+    if (
+      distance < bestDistance ||
+      (distance === bestDistance && flat > bestFlat)
+    ) {
+      best = candidate;
+      bestDistance = distance;
+      bestFlat = flat;
+    }
+  }
+
+  return best ? best.version : null;
 }
 
 /**
- * Finds exact match by major.minor version (highest patch within that minor version)
+ * Finds exact match by major.minor version (closest patch within that minor version)
  * Returns null if no exact major.minor match exists
+ * Uses same distance algorithm as findClosestVersion for same-minor matching
  * @param {string} targetVersion - The target version to match (e.g., "1.4.0")
  * @param {string[]} availableVersions - Array of available versions to search
- * @returns {string|null} Exact major.minor match (highest patch) or null if not found
+ * @returns {string|null} Exact major.minor match (closest patch) or null if not found
  */
 export function findExactMinorMatch(targetVersion, availableVersions) {
   const target = parseVersion(targetVersion);
   const candidates = availableVersions
     .map(v => {
       try {
-        return parseVersion(v);
+        return { version: v, parsed: parseVersion(v) };
       } catch {
         return null;
       }
@@ -113,16 +172,31 @@ export function findExactMinorMatch(targetVersion, availableVersions) {
 
   // Filter to exact major.minor match
   const exactMatches = candidates.filter(
-    v => v.major === target.major && v.minor === target.minor
+    c => c.parsed.major === target.major && c.parsed.minor === target.minor
   );
 
   if (exactMatches.length === 0) {
     return null;
   }
 
-  // Return highest patch in this major.minor version
-  exactMatches.sort((a, b) => b.patch - a.patch);
-  return `${exactMatches[0].major}.${exactMatches[0].minor}.${exactMatches[0].patch}`;
+  // Find closest patch using distance algorithm
+  let best = null;
+  let bestDistance = Infinity;
+
+  for (const candidate of exactMatches) {
+    const p = candidate.parsed;
+    const distance = Math.abs(p.patch - target.patch);
+
+    if (
+      distance < bestDistance ||
+      (distance === bestDistance && p.patch > best.parsed.patch)
+    ) {
+      best = candidate;
+      bestDistance = distance;
+    }
+  }
+
+  return best.version;
 }
 
 /**
