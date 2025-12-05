@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import fs from 'fs/promises';
 import path from 'path';
-import { downloadTypeDefinitions, parseVersion, getTypesStrategy, findClosestVersion, fetchTypesVersions } from '../src/version.js';
+import { downloadTypeDefinitions, parseVersion, getTypesStrategy, findClosestVersion, findExactMinorMatch, fetchTypesVersions } from '../src/version.js';
 
 let originalFetch;
 const tmpDir = path.join('tests', 'tmp-types');
@@ -54,6 +54,30 @@ describe('findClosestVersion', () => {
   it('handles single available version', () => {
     const result = findClosestVersion('1.4.0', ['1.7.7']);
     expect(result).toBe('1.7.7');
+  });
+});
+
+describe('findExactMinorMatch', () => {
+  const availableVersions = ['1.3.0', '1.4.2', '1.4.3', '1.5.0', '1.7.6', '1.7.7'];
+
+  it('finds exact major.minor match with highest patch', () => {
+    const result = findExactMinorMatch('1.4.0', availableVersions);
+    expect(result).toBe('1.4.3'); // Highest patch in 1.4.x
+  });
+
+  it('returns null when no exact major.minor match exists', () => {
+    const result = findExactMinorMatch('1.6.0', availableVersions);
+    expect(result).toBeNull(); // No 1.6.x available
+  });
+
+  it('returns null when no matching major version', () => {
+    const result = findExactMinorMatch('2.0.0', availableVersions);
+    expect(result).toBeNull();
+  });
+
+  it('works with single matching version', () => {
+    const result = findExactMinorMatch('1.7.6', availableVersions);
+    expect(result).toBe('1.7.7'); // Highest patch in 1.7.x
   });
 });
 
@@ -133,7 +157,7 @@ describe('downloadTypeDefinitions for p5.js 1.x', () => {
       };
     };
 
-    const actual = await downloadTypeDefinitions('1.4.0', tmpDir);
+    const actual = await downloadTypeDefinitions('1.4.0', tmpDir, null, null, false);
     expect(actual).toBe('1.4.3'); // Closest match to 1.4.0
 
     // Verify files downloaded from correct version
@@ -161,7 +185,7 @@ describe('downloadTypeDefinitions for p5.js 1.x', () => {
       };
     };
 
-    const actual = await downloadTypeDefinitions('1.9.0', tmpDir);
+    const actual = await downloadTypeDefinitions('1.9.0', tmpDir, null, null, false);
     expect(actual).toBe('1.7.7'); // Closest to 1.9.0
 
     expect(fetchedUrls).toContain('https://cdn.jsdelivr.net/npm/@types/p5@1.7.7/global.d.ts');
@@ -187,7 +211,7 @@ describe('downloadTypeDefinitions for p5.js 1.x', () => {
       };
     };
 
-    await downloadTypeDefinitions('1.9.0', tmpDir, null, 'instance');
+    await downloadTypeDefinitions('1.9.0', tmpDir, null, 'instance', false);
 
     // Should only fetch index.d.ts for instance mode
     const typesFetches = fetchedUrls.filter(url => url.includes('@types/p5@') && url.endsWith('.d.ts'));
@@ -207,7 +231,7 @@ describe('downloadTypeDefinitions for p5.js 2.x', () => {
       };
     };
 
-    const actual = await downloadTypeDefinitions('2.1.1', tmpDir);
+    const actual = await downloadTypeDefinitions('2.1.1', tmpDir, null, null, false);
     expect(actual).toBe('2.1.1'); // Exact match
 
     // Verify bundled types URLs
@@ -246,7 +270,7 @@ describe('downloadTypeDefinitions for p5.js 2.x', () => {
       };
     };
 
-    const actual = await downloadTypeDefinitions('2.0.0', tmpDir);
+    const actual = await downloadTypeDefinitions('2.0.0', tmpDir, null, null, false);
     expect(actual).toBe('2.0.2'); // Closest 2.x version with types
 
     // Verify fallback to 2.0.2
@@ -284,7 +308,7 @@ describe('downloadTypeDefinitions for p5.js 2.x', () => {
       };
     };
 
-    const actual = await downloadTypeDefinitions('2.0.1', tmpDir);
+    const actual = await downloadTypeDefinitions('2.0.1', tmpDir, null, null, false);
     expect(actual).toBe('2.0.2'); // Closest available
 
     expect(fetchedUrls.some(url => url.includes('p5@2.0.2/types/global.d.ts'))).toBe(true);
@@ -300,7 +324,7 @@ describe('downloadTypeDefinitions for p5.js 2.x', () => {
       };
     };
 
-    await downloadTypeDefinitions('2.1.1', tmpDir, null, 'instance');
+    await downloadTypeDefinitions('2.1.1', tmpDir, null, 'instance', false);
 
     // Should fetch p5.d.ts twice: once to test existence, once to download
     // Filter to unique URLs
@@ -317,7 +341,7 @@ describe('downloadTypeDefinitions error handling', () => {
       throw new Error('fetch failed');
     };
 
-    await expect(downloadTypeDefinitions('1.9.0', tmpDir)).rejects.toThrow(
+    await expect(downloadTypeDefinitions('1.9.0', tmpDir, null, null, false)).rejects.toThrow(
       'Failed to download TypeScript definitions'
     );
   });
@@ -335,7 +359,7 @@ describe('downloadTypeDefinitions error handling', () => {
       return { ok: false, status: 404 };
     };
 
-    await expect(downloadTypeDefinitions('1.9.0', tmpDir)).rejects.toThrow(
+    await expect(downloadTypeDefinitions('1.9.0', tmpDir, null, null, false)).rejects.toThrow(
       'No compatible @types/p5 version found'
     );
   });
