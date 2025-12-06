@@ -45,10 +45,10 @@ create-p5/
 │   ├── git.js               # Git operations
 │   └── utils.js             # Utilities (validation, file ops, etc.)
 ├── templates/
-│   ├── basic/               # Standard p5.js with global mode
-│   ├── instance/            # Instance mode for multiple sketches
-│   ├── typescript/          # TypeScript setup with type definitions
-│   └── empty/               # Minimal HTML only
+│   ├── basic-global-js/     # JavaScript + Global mode
+│   ├── basic-global-ts/     # TypeScript + Global mode
+│   ├── basic-instance-js/   # JavaScript + Instance mode
+│   └── basic-instance-ts/   # TypeScript + Instance mode
 ├── tests/
 └── types/
     └── default/
@@ -120,7 +120,7 @@ The `version.js` module:
 
 ### Philosophy
 Follow incremental development in 6-10 stages with 2-4 atomic commits per stage:
-1. **Proof of Concept** - Hardcoded, single feature, validates approach
+1. **Proof of Concept** - Hardcoded, single feature, validates approach (only if new architecture)
 2. **Dynamic Input** - Real data, user choices
 3. **Persistence** - Save/load state
 4. **Alternative Modes** - Different paths through the system
@@ -174,14 +174,18 @@ Created during scaffolding, used by update commands. Stores minimal metadata abo
 {
   "version": "1.9.0",
   "mode": "cdn",
+  "language": "javascript",
+  "p5Mode": "global",
   "typeDefsVersion": "1.7.7",
-  "lastUpdated": "2025-11-28T10:30:00Z"
+  "lastUpdated": "2025-12-06T10:30:00Z"
 }
 ```
 
 **Fields:**
 - `version` - The p5.js version currently in use
 - `mode` - Delivery mode: "cdn" or "local"
+- `language` - Programming language: "javascript" or "typescript" (null for community templates)
+- `p5Mode` - p5.js mode: "global" or "instance" (null for community templates)
 - `typeDefsVersion` - Version of TypeScript definitions installed (null if none)
 - `lastUpdated` - ISO timestamp of last modification
 
@@ -353,7 +357,10 @@ https://cdn.jsdelivr.net/npm/p5@{version}/lib/p5.min.js
 npm create p5@latest
 
 # Non-interactive with flags
-npm create p5@latest my-sketch -- --template typescript --mode cdn --yes
+npm create p5@latest my-sketch -- --language typescript --p5-mode instance --mode cdn --yes
+
+# With community template
+npm create p5@latest my-sketch -- --template user/repo --yes
 
 # Update existing project
 npx create-p5 update --version 1.10.0
