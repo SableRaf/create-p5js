@@ -48,6 +48,29 @@ export async function promptProjectPath(initialValue) {
 }
 
 /**
+ * Prompt for whether to customize project configuration
+ * @returns {Promise<boolean>} True if user wants to customize, false for defaults
+ */
+export async function promptCustomize() {
+  const result = await p.select({
+    message: t('prompt.customize.message'),
+    options: [
+      {
+        value: false,
+        label: t('prompt.customize.option.no.label'),
+        hint: t('prompt.customize.option.no.hint')
+      },
+      {
+        value: true,
+        label: t('prompt.customize.option.yes.label'),
+        hint: t('prompt.customize.option.yes.hint')
+      }
+    ]
+  });
+  return result;
+}
+
+/**
  * Prompt for language selection
  * @returns {Promise<string>} Selected language ('javascript' or 'typescript')
  */

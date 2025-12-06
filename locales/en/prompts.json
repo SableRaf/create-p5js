@@ -4,6 +4,12 @@
   "prompt.projectPath.error.absolutePath": "Please use a relative path (e.g., \"./my-sketch\" or \"my-sketch\")",
   "prompt.projectPath.error.invalidChars": "Path contains invalid characters",
 
+  "prompt.customize.message": "How would you like to set up your project?",
+  "prompt.customize.option.no.label": "Standard",
+  "prompt.customize.option.no.hint": "Uses recommended defaults",
+  "prompt.customize.option.yes.label": "Yes",
+  "prompt.customize.option.yes.hint": "Lets you select a p5.js version, mode, and language",
+
   "prompt.languageMode.message": "Select language and mode:",
   "prompt.languageMode.group.language.label": "Language",
   "prompt.languageMode.group.language.hint": "Choose your programming language",
