@@ -53,6 +53,22 @@ export async function scaffold(args) {
     }
   }
 
+  // Determine if user wants to customize (only in interactive mode without flags)
+  let shouldCustomize = false;
+  const hasConfigFlags = args.language || args['p5-mode'] || args.version || args.mode || args.template;
+
+  if (!args.yes && !hasConfigFlags) {
+    // Interactive mode without config flags: ask if they want to customize
+    shouldCustomize = await prompts.promptCustomize();
+    if (prompts.isCancel(shouldCustomize)) {
+      display.cancel('prompt.cancel.sketchCreation');
+    }
+  } else if (hasConfigFlags) {
+    // If user provided config flags, they clearly want to customize
+    shouldCustomize = true;
+  }
+  // If --yes flag, shouldCustomize remains false (use defaults)
+
   // Normalize the path
   projectPath = projectPath.trim() || '.';
 
@@ -176,37 +192,41 @@ export async function scaffold(args) {
       }
     }
 
-    // Determine version (flag or prompt) - MOVED UP
+    // Determine version (flag, default, or prompt)
     let selectedVersion;
     if (args.version) {
       selectedVersion = args.version === 'latest' ? latest : args.version;
       display.success('info.usingVersion', { version: selectedVersion });
-    } else if (args.yes) {
+    } else if (!shouldCustomize) {
+      // Use default (latest) when not customizing
       selectedVersion = latest;
       display.success('info.latestVersion', { version: latest });
     } else {
+      // Interactive customization mode
       selectedVersion = await prompts.promptVersion(versions, latest);
       if (prompts.isCancel(selectedVersion)) {
         display.cancel('prompt.cancel.sketchCreation');
       }
     }
 
-    // Determine delivery mode (flag or prompt) - MOVED UP
+    // Determine delivery mode (flag, default, or prompt)
     let selectedMode;
     if (args.mode) {
       selectedMode = args.mode;
       display.success('info.usingMode', { mode: selectedMode });
-    } else if (args.yes) {
+    } else if (!shouldCustomize) {
+      // Use default (cdn) when not customizing
       selectedMode = 'cdn';
       display.success('info.defaultMode');
     } else {
+      // Interactive customization mode
       selectedMode = await prompts.promptMode();
       if (prompts.isCancel(selectedMode)) {
         display.cancel('prompt.cancel.sketchCreation');
       }
     }
 
-    // Determine language, p5Mode, and template - MOVED DOWN
+    // Determine language, p5Mode, and template
     let selectedLanguage, selectedP5Mode, selectedTemplate;
 
     if (args.template) {
@@ -221,14 +241,14 @@ export async function scaffold(args) {
       selectedP5Mode = args['p5-mode'];
       selectedTemplate = null;
       display.success('info.usingLanguageMode', { language: selectedLanguage, p5Mode: selectedP5Mode });
-    } else if (args.yes) {
-      // Defaults: JavaScript + Global mode
+    } else if (!shouldCustomize) {
+      // Use defaults: JavaScript + Global mode (when not customizing)
       selectedLanguage = 'javascript';
       selectedP5Mode = 'global';
       selectedTemplate = null;
       display.success('info.defaultLanguageMode');
     } else {
-      // Interactive mode: prompt for language and mode
+      // Interactive customization mode: prompt for language and mode
       const choices = await prompts.promptLanguageAndMode();
       if (prompts.isCancel(choices)) {
         display.cancel('prompt.cancel.sketchCreation');
