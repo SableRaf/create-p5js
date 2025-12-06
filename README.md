@@ -141,7 +141,7 @@ This forces VS Code to reload `jsconfig.json` and recognize the type definitions
 
 This project builds upon the work of the p5.js community. Thanks to all contributors and maintainers of p5.js. Thanks also to [@nbogie](https://github.com/nbogie) and [@davepagurek](https://github.com/davepagurek) for their suggestions and feedback.
 
-## Warnings
+## Disclaimers
 
 - This tool is provided "as is" without warranty of any kind. Use it at your own risk, and always back up your projects before applying updates.
 - The create-p5js project is not an official p5.js or Processing Foundation release, though it aims to support and enhance the p5.js ecosystem.
