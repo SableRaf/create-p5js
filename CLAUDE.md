@@ -107,10 +107,10 @@ The `version.js` module:
 - All versions accessed via `data.versions` array
 - Shows latest 15 versions in interactive mode
 - Downloads p5.js files from jsdelivr CDN when using local mode
-- Uses a **two-tier strategy** for TypeScript definitions:
-  - **p5.js 1.x**: Downloads from `@types/p5@1.7.7` package (DefinitelyTyped)
+- Uses a **simple two-tier strategy** for TypeScript definitions:
+  - **p5.js 1.x**: Copies minimal `global.d.ts` from repo that tells VS Code to auto-acquire from `@types/p5`
   - **p5.js 2.x (2.0.2+)**: Downloads bundled types from p5 package itself
-  - **p5.js 2.0.0-2.0.1**: Falls back to `@types/p5@1.7.7` (bundled types not yet available)
+  - **p5.js 2.0.0-2.0.1**: Hardcoded fallback to download types from 2.0.2
 
 ## Development Workflow
 
@@ -265,7 +265,7 @@ const latest = data.tags.latest;  // Latest stable version
 - `parseVersion(version)` - Parses semver string into components (major, minor, patch, prerelease)
 - `getTypesStrategy(version)` - Determines whether to use @types/p5 or bundled types
 - `downloadP5Files(version, targetDir, spinner)` - Downloads p5.js library files for local mode
-- `downloadTypeDefinitions(version, targetDir, spinner, template)` - Downloads TypeScript definitions using two-tier strategy
+- `downloadTypeDefinitions(p5Version, targetDir, spinner, template)` - Downloads or copies TypeScript definitions using simple two-tier strategy
 
 ### FileManager Implementation Details
 
@@ -300,29 +300,38 @@ if (response.ok) {
 
 ### TypeScript Type Definitions Strategy
 
-The tool uses a **two-tier strategy** for downloading TypeScript definitions based on p5.js version:
+The tool uses a **simple two-tier strategy** for TypeScript definitions based on p5.js major version:
 
-**For p5.js 1.x (and 2.0.0-2.0.1):**
-Use `@types/p5@1.7.7` from DefinitelyTyped:
+**For p5.js 1.x:**
+Copies minimal `global.d.ts` from `types/default/v1/global.d.ts` in the repo. This file tells VS Code to auto-acquire type definitions from the `@types/p5` package:
+```javascript
+// Contents of types/default/v1/global.d.ts
+import * as p5Global from "p5/global";
+import module from "p5";
+export = module;
+export as namespace p5;
 ```
-https://cdn.jsdelivr.net/npm/@types/p5@1.7.7/global.d.ts  # For global mode
-https://cdn.jsdelivr.net/npm/@types/p5@1.7.7/index.d.ts   # For instance mode
-```
+- **No network requests needed** - file is bundled with create-p5
+- **No version matching** - VS Code automatically uses latest compatible @types/p5
+- **Always returns `1.7.7`** as typeDefsVersion for reference only
 
-**For p5.js 2.x (starting from 2.0.2):**
-Use bundled types from p5 package itself:
+**For p5.js 2.x (2.0.2+):**
+Downloads bundled types directly from the p5 package:
 ```
 https://cdn.jsdelivr.net/npm/p5@{version}/types/global.d.ts  # For global mode
 https://cdn.jsdelivr.net/npm/p5@{version}/types/p5.d.ts      # For instance mode
 ```
+- **Hardcoded fallback**: Versions 2.0.0, 2.0.1, and 2.0.0-* pre-releases use types from 2.0.2
+- **No validation** - downloads directly from CDN, fails fast if types don't exist
+- **Returns actual version used** (e.g., "2.0.2" for 2.0.0, or exact version for 2.0.3+)
 
 **Implementation:**
-- `getTypesStrategy(version)` determines which strategy to use
+- `getTypesStrategy(version)` determines which strategy to use based on major version
 - Returns `{ useTypesPackage: boolean, reason: string }`
-- `downloadTypeDefinitions()` uses this strategy to download correct files
+- `downloadTypeDefinitions(p5Version, targetDir, spinner, template)` executes the appropriate strategy
 - Stores actual types version in `typeDefsVersion` field of `p5-config.json`
-
-See `docs/TYPES_VERSION_STRATEGY.md` for detailed documentation of the version matching logic.
+- **No user prompts** - fully deterministic based on version number
+- **No validation requests** - faster execution, simpler code
 
 ### Download URLs for Local Mode
 
