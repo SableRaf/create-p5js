@@ -17,8 +17,6 @@
   "spinner.downloadedP5": "p5.js files downloaded successfully",
   "spinner.failedP5": "Failed to download p5.js files",
 
-  "spinner.lookingUpTypes": "Looking up available TypeScript definitions...",
-  "spinner.lookedUpTypes": "✓ Found available TypeScript definitions",
   "spinner.downloadingTypes": "Downloading TypeScript definitions...",
   "spinner.downloadedTypes": "TypeScript definitions downloaded (v{version})",
   "spinner.failedTypes": "Failed to download TypeScript definitions",

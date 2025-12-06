@@ -33,12 +33,5 @@
 
   "prompt.update.deleteLib.message": "Delete the local lib/ directory?",
 
-  "prompt.typesVersion.message": "No exact TypeScript definitions found for p5.js {p5Version}. Select a version to use:",
-  "prompt.typesVersion.hint": "Recommended: {recommendedVersion} (closest match by version)",
-  "prompt.typesVersion.recommendedLabel": "{version} (recommended)",
-  "prompt.typesVersion.strategy.types": "from @types/p5",
-  "prompt.typesVersion.strategy.bundled": "bundled with p5.js",
-
-  "prompt.cancel.sketchCreation": "You cancelled the sketch creation",
-  "prompt.cancel.typesSelection": "Skipping TypeScript definitions download"
+  "prompt.cancel.sketchCreation": "You cancelled the sketch creation"
 }

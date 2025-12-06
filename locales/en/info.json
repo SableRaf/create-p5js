@@ -5,7 +5,6 @@
   "info.includePrerelease": "Including pre-release versions (RC, beta, alpha)",
   "info.continueWithoutTypes": "Continuing without TypeScript definitions...",
   "info.skipTypes": "Skipping TypeScript definitions download (--no-types flag)",
-  "info.autoSelectedTypes": "No exact TypeScript definitions found for p5.js {p5Version}. Automatically selected {typesVersion} (closest match).",
   "info.stackTrace": "Stack trace:",
 
   "info.config.header": "Project configuration:",
