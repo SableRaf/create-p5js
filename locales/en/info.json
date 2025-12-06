@@ -9,7 +9,8 @@
 
   "info.config.header": "Project configuration:",
   "info.config.projectName": "  Project name: {name}",
-  "info.config.template": "  Template: {template}",
+  "info.config.language": "  Language: {language}",
+  "info.config.p5Mode": "  p5.js mode: {p5Mode}",
   "info.config.version": "  p5.js version: {version}",
   "info.config.mode": "  Delivery mode: {mode}",
   "info.config.git.yes": "  Git initialization: yes",
@@ -17,8 +18,9 @@
   "info.config.types.yes": "  TypeScript definitions: yes",
   "info.config.types.no": "  TypeScript definitions: no",
 
-  "info.usingTemplate": "Using template: {template}",
-  "info.defaultTemplate": "Using default template: basic",
+  "info.usingLanguageMode": "Using: {language} + {p5Mode} mode",
+  "info.defaultLanguageMode": "Using default: JavaScript + Global mode",
+  "info.usingCommunityTemplate": "Using community template: {template}",
   "info.usingVersion": "Using p5.js version: {version}",
   "info.latestVersion": "Using latest p5.js version: {version}",
   "info.usingMode": "Using delivery mode: {mode}",

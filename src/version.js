@@ -157,16 +157,33 @@ export async function downloadP5Files(version, targetDir, spinner = null) {
  * @param {string} targetDir - The directory path where type definitions should be saved
  * @param {Object} [spinner] - Optional spinner object with stop() method for progress feedback
  * @param {string} [template] - The template being used ('instance', 'basic', 'typescript', 'empty')
+ * @param {string} [previousVersion] - Optional previous p5.js version (for detecting major version changes)
  * @returns {Promise<string>} The actual types version used
  * @throws {Error} If download fails
  */
-export async function downloadTypeDefinitions(p5Version, targetDir, spinner = null, template = null) {
+export async function downloadTypeDefinitions(p5Version, targetDir, spinner = null, template = null, previousVersion = null) {
   const cdnBase = 'https://cdn.jsdelivr.net/npm';
   const isInstanceMode = template === 'instance';
 
   try {
     // Determine strategy based on p5.js version
     const strategy = getTypesStrategy(p5Version);
+
+    // Check if we're downgrading from 2.x to 1.x
+    if (previousVersion) {
+      const prevStrategy = getTypesStrategy(previousVersion);
+      const isDowngrading = !prevStrategy.useTypesPackage && strategy.useTypesPackage;
+
+      if (isDowngrading) {
+        // Clear the types folder when downgrading from 2.x to 1.x
+        const { removeDirectory } = await import('./utils.js');
+        await removeDirectory(targetDir);
+
+        // Recreate the directory
+        const { createDirectory } = await import('./utils.js');
+        await createDirectory(targetDir);
+      }
+    }
 
     if (strategy.useTypesPackage) {
       // p5.js 1.x: Copy minimal global.d.ts from repo

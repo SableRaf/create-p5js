@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateProjectName, validateProjectPath, validateTemplate, validateMode, validateVersion } from '../src/utils.js';
+import { validateProjectName, validateProjectPath, isRemoteTemplateSpec, validateMode, validateVersion, validateLanguage, validateP5Mode, getTemplateName } from '../src/utils.js';
 
 describe('utils validations', () => {
   it('validateProjectName rejects empty and invalid names', () => {
@@ -22,9 +22,33 @@ describe('utils validations', () => {
     expect(validateProjectPath(42)).toBeNull(); // Valid: "42" is a relative path
   });
 
-  it('validateTemplate accepts known templates', () => {
-    expect(validateTemplate('basic')).toBeNull();
-    expect(validateTemplate('unknown')).toMatch(/Invalid template/);
+  it('isRemoteTemplateSpec detects remote templates', () => {
+    // Remote templates (GitHub repos)
+    expect(isRemoteTemplateSpec('user/repo')).toBe(true);
+    expect(isRemoteTemplateSpec('https://github.com/user/repo.git')).toBe(true);
+
+    // Not remote templates
+    expect(isRemoteTemplateSpec('basic')).toBe(false);
+    expect(isRemoteTemplateSpec('typescript')).toBe(false);
+  });
+
+  it('validateLanguage accepts javascript and typescript', () => {
+    expect(validateLanguage('javascript')).toBeNull();
+    expect(validateLanguage('typescript')).toBeNull();
+    expect(validateLanguage('python')).toMatch(/Invalid language/);
+  });
+
+  it('validateP5Mode accepts global and instance', () => {
+    expect(validateP5Mode('global')).toBeNull();
+    expect(validateP5Mode('instance')).toBeNull();
+    expect(validateP5Mode('custom')).toMatch(/Invalid mode/);
+  });
+
+  it('getTemplateName creates correct template directory names', () => {
+    expect(getTemplateName('javascript', 'global')).toBe('basic-global-js');
+    expect(getTemplateName('javascript', 'instance')).toBe('basic-instance-js');
+    expect(getTemplateName('typescript', 'global')).toBe('basic-global-ts');
+    expect(getTemplateName('typescript', 'instance')).toBe('basic-instance-ts');
   });
 
   it('validateMode accepts cdn and local', () => {

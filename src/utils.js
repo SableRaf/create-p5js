@@ -209,32 +209,21 @@ export async function directoryExists(dirPath) {
 }
 
 /**
- * Validates that a template name is one of the supported templates
+ * Checks if a template spec represents a remote template (GitHub repo)
  *
- * @param {string} template - The template name to validate
- * @returns {string|null} Error message if invalid, null if valid
+ * @param {string} template - The template spec to check
+ * @returns {boolean} True if remote template, false otherwise
  */
-export function validateTemplate(template) {
-  const validTemplates = ['basic', 'instance', 'typescript', 'empty'];
+export function isRemoteTemplateSpec(template) {
+  if (typeof template !== 'string') return false;
 
-  // Allow built-in templates
-  if (validTemplates.includes(template)) return null;
+  // Full URL
+  if (/^https?:\/\//.test(template)) return true;
 
-  // Allow remote templates specified as GitHub shorthand (user/repo or user/repo/path)
-  // or as full URLs (https://github.com/user/repo.git, etc.)
-  try {
-    if (typeof template === 'string') {
-      // Full URL
-      if (/^https?:\/\//.test(template)) return null;
+  // GitHub shorthand (user/repo or user/repo/subdir) contains a slash
+  if (/^[^\s]+\/[^\s]+/.test(template)) return true;
 
-      // GitHub shorthand (user/repo or user/repo/subdir) contains a slash
-      if (/^[^\s]+\/[^^\s]+/.test(template)) return null;
-    }
-  } catch (e) {
-    // fall through to error
-  }
-
-  return `Invalid template "${template}". Valid templates: ${validTemplates.join(', ')} or a GitHub repository (user/repo or URL)`;
+  return false;
 }
 
 /**
@@ -249,6 +238,43 @@ export function validateMode(mode) {
     return `Invalid mode "${mode}". Valid modes: ${validModes.join(', ')}`;
   }
   return null;
+}
+
+/**
+ * Validates language choice
+ * @param {string} language - Language to validate
+ * @returns {string|null} Error message or null if valid
+ */
+export function validateLanguage(language) {
+  const valid = ['javascript', 'typescript'];
+  if (!valid.includes(language)) {
+    return `Invalid language: ${language}. Must be one of: ${valid.join(', ')}`;
+  }
+  return null;
+}
+
+/**
+ * Validates p5.js mode choice
+ * @param {string} mode - Mode to validate
+ * @returns {string|null} Error message or null if valid
+ */
+export function validateP5Mode(mode) {
+  const valid = ['global', 'instance'];
+  if (!valid.includes(mode)) {
+    return `Invalid mode: ${mode}. Must be one of: ${valid.join(', ')}`;
+  }
+  return null;
+}
+
+/**
+ * Determines template directory name from language and mode
+ * @param {string} language - 'javascript' or 'typescript'
+ * @param {string} mode - 'global' or 'instance'
+ * @returns {string} Template directory name (e.g., 'basic-global-js')
+ */
+export function getTemplateName(language, mode) {
+  const langSuffix = language === 'typescript' ? 'ts' : 'js';
+  return `basic-${mode}-${langSuffix}`;
 }
 
 /**

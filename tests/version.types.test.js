@@ -223,6 +223,116 @@ describe("downloadTypeDefinitions for p5.js 2.x", () => {
   });
 });
 
+describe("downloadTypeDefinitions version downgrade", () => {
+  it("clears types folder when downgrading from 2.x to 1.x", async () => {
+    // First, simulate 2.x types being present
+    globalThis.fetch = async () => ({
+      ok: true,
+      text: async () => "// p5.js 2.x types",
+    });
+
+    await downloadTypeDefinitions("2.1.0", tmpDir, null, null);
+
+    // Verify 2.x types exist (global.d.ts and p5.d.ts)
+    const globalDtsPath = path.join(tmpDir, "global.d.ts");
+    const p5DtsPath = path.join(tmpDir, "p5.d.ts");
+
+    let globalExists = await fs.access(globalDtsPath).then(() => true).catch(() => false);
+    let p5Exists = await fs.access(p5DtsPath).then(() => true).catch(() => false);
+
+    expect(globalExists).toBe(true);
+    expect(p5Exists).toBe(true);
+
+    // Now downgrade to 1.x, passing previous version
+    await downloadTypeDefinitions(
+      "1.9.0",      // newVersion (1.x)
+      tmpDir,
+      null,
+      null,
+      "2.1.0"       // previousVersion (2.x)
+    );
+
+    // Verify old 2.x p5.d.ts was removed
+    p5Exists = await fs.access(p5DtsPath).then(() => true).catch(() => false);
+    expect(p5Exists).toBe(false);
+
+    // Verify new 1.x global.d.ts exists with correct content
+    globalExists = await fs.access(globalDtsPath).then(() => true).catch(() => false);
+    expect(globalExists).toBe(true);
+
+    const content = await fs.readFile(globalDtsPath, "utf-8");
+    expect(content).toContain('import * as p5Global from "p5/global"');
+  });
+
+  it("does not clear types folder when upgrading from 1.x to 2.x", async () => {
+    // First, set up 1.x types
+    await downloadTypeDefinitions("1.9.0", tmpDir, null, null);
+
+    const globalDtsPath = path.join(tmpDir, "global.d.ts");
+    const content1x = await fs.readFile(globalDtsPath, "utf-8");
+
+    // Mock fetch for 2.x types
+    globalThis.fetch = async () => ({
+      ok: true,
+      text: async () => "// p5.js 2.x types",
+    });
+
+    // Upgrade to 2.x
+    await downloadTypeDefinitions(
+      "2.1.0",      // newVersion (2.x)
+      tmpDir,
+      null,
+      null,
+      "1.9.0"       // previousVersion (1.x)
+    );
+
+    // Verify 2.x types were added
+    const p5DtsPath = path.join(tmpDir, "p5.d.ts");
+    const p5Exists = await fs.access(p5DtsPath).then(() => true).catch(() => false);
+    expect(p5Exists).toBe(true);
+
+    // Verify global.d.ts was updated (no longer contains 1.x content)
+    const content2x = await fs.readFile(globalDtsPath, "utf-8");
+    expect(content2x).not.toBe(content1x);
+    expect(content2x).toBe("// p5.js 2.x types");
+  });
+
+  it("does not clear types folder when updating within same major version", async () => {
+    // Mock fetch
+    globalThis.fetch = async () => ({
+      ok: true,
+      text: async () => "// p5.js 2.x types",
+    });
+
+    // Set up 2.0.2 types
+    await downloadTypeDefinitions("2.0.2", tmpDir, null, null);
+
+    const globalDtsPath = path.join(tmpDir, "global.d.ts");
+    const p5DtsPath = path.join(tmpDir, "p5.d.ts");
+
+    // Verify both files exist
+    let globalExists = await fs.access(globalDtsPath).then(() => true).catch(() => false);
+    let p5Exists = await fs.access(p5DtsPath).then(() => true).catch(() => false);
+    expect(globalExists).toBe(true);
+    expect(p5Exists).toBe(true);
+
+    // Update to 2.1.0 (same major version)
+    await downloadTypeDefinitions(
+      "2.1.0",      // newVersion
+      tmpDir,
+      null,
+      null,
+      "2.0.2"       // previousVersion
+    );
+
+    // Both files should still exist
+    globalExists = await fs.access(globalDtsPath).then(() => true).catch(() => false);
+    p5Exists = await fs.access(p5DtsPath).then(() => true).catch(() => false);
+    expect(globalExists).toBe(true);
+    expect(p5Exists).toBe(true);
+  });
+});
+
 describe("downloadTypeDefinitions error handling", () => {
   it("throws error when download fails for p5.js 2.x", async () => {
     globalThis.fetch = async () => ({

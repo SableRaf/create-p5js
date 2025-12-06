@@ -48,35 +48,88 @@ export async function promptProjectPath(initialValue) {
 }
 
 /**
- * Prompt for template selection
- * @returns {Promise<string>} Selected template value
+ * Prompt for whether to customize project configuration
+ * @returns {Promise<boolean>} True if user wants to customize, false for defaults
  */
-export async function promptTemplate() {
-  return await p.select({
-    message: t('prompt.template.message'),
+export async function promptCustomize() {
+  const result = await p.select({
+    message: t('prompt.customize.message'),
     options: [
       {
-        value: 'basic',
-        label: t('prompt.template.option.basic.label'),
-        hint: t('prompt.template.option.basic.hint')
+        value: false,
+        label: t('prompt.customize.option.no.label'),
+        hint: t('prompt.customize.option.no.hint')
       },
       {
-        value: 'instance',
-        label: t('prompt.template.option.instance.label'),
-        hint: t('prompt.template.option.instance.hint')
-      },
-      {
-        value: 'typescript',
-        label: t('prompt.template.option.typescript.label'),
-        hint: t('prompt.template.option.typescript.hint')
-      },
-      {
-        value: 'empty',
-        label: t('prompt.template.option.empty.label'),
-        hint: t('prompt.template.option.empty.hint')
+        value: true,
+        label: t('prompt.customize.option.yes.label'),
+        hint: t('prompt.customize.option.yes.hint')
       }
     ]
   });
+  return result;
+}
+
+/**
+ * Prompt for language selection
+ * @returns {Promise<string>} Selected language ('javascript' or 'typescript')
+ */
+export async function promptLanguage() {
+  return await p.select({
+    message: t('prompt.languageMode.group.language.label'),
+    options: [
+      {
+        value: 'javascript',
+        label: t('prompt.languageMode.option.javascript.label'),
+        hint: t('prompt.languageMode.option.javascript.hint')
+      },
+      {
+        value: 'typescript',
+        label: t('prompt.languageMode.option.typescript.label'),
+        hint: t('prompt.languageMode.option.typescript.hint')
+      }
+    ]
+  });
+}
+
+/**
+ * Prompt for p5.js mode selection
+ * @returns {Promise<string>} Selected mode ('global' or 'instance')
+ */
+export async function promptP5Mode() {
+  return await p.select({
+    message: t('prompt.languageMode.group.mode.label'),
+    options: [
+      {
+        value: 'global',
+        label: t('prompt.languageMode.option.global.label'),
+        hint: t('prompt.languageMode.option.global.hint')
+      },
+      {
+        value: 'instance',
+        label: t('prompt.languageMode.option.instance.label'),
+        hint: t('prompt.languageMode.option.instance.hint')
+      }
+    ]
+  });
+}
+
+/**
+ * Prompt for language and mode selection using two separate prompts
+ * @returns {Promise<string[]>} Array of selected values: ['javascript'|'typescript', 'global'|'instance']
+ */
+export async function promptLanguageAndMode() {
+  const language = await promptLanguage();
+  if (isCancel(language)) {
+    return language; // Return the cancel symbol
+  }
+
+  const mode = await promptP5Mode();
+  if (isCancel(mode)) {
+    return mode; // Return the cancel symbol
+  }
+
+  return [language, mode];
 }
 
 /**

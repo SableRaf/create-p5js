@@ -50,28 +50,26 @@ Then follow the prompts to set up your new p5.js project.
 
 ## Using Command Line Options
 
-You can also directly specify the project name and the template you want to use via additional command line options. For example, to scaffold a p5.js + TypeScript project, run:
+You can also directly specify the project name, language, and mode via additional command line options. For example, to scaffold a p5.js + TypeScript project with instance mode, run:
 
 ```bash
 # npm 7+, extra double-dash is needed:
-npm create p5js my-sketch -- --template typescript
+npm create p5js my-sketch -- --language typescript --p5-mode instance
 
 # yarn
-yarn create p5js my-sketch --template typescript
+yarn create p5js my-sketch --language typescript --p5-mode instance
 
 # pnpm
-pnpm create p5js my-sketch --template typescript
+pnpm create p5js my-sketch --language typescript --p5-mode instance
 
 # Bun
-bun create p5js my-sketch --template typescript
+bun create p5js my-sketch --language typescript --p5-mode instance
 ```
 
-Currently supported template presets include:
+Currently supported options include:
 
-- `basic` - Standard p5.js with global mode
-- `instance` - Instance mode for multiple sketches
-- `typescript` - TypeScript setup with type definitions
-- `empty` - Minimal HTML only
+- **Language**: `javascript` (default) or `typescript`
+- **p5.js Mode**: `global` (default) or `instance`
 
 You can use `.` for the project name to scaffold in the current directory.
 
@@ -83,7 +81,7 @@ You can use `.` for the project name to scaffold in the current directory.
 npm create p5js -- --yes
 ```
 
-This will use default values (random project name like `flamboyant-duck`, template: `basic`, version: `latest`, mode: `cdn`).
+This will use default values (random project name like `flamboyant-duck`, language: `javascript`, p5.js mode: `global`, version: `latest`, delivery mode: `cdn`).
 
 **Specify p5.js version:**
 
@@ -112,19 +110,26 @@ This command will let you update the p5.js version and/or mode, applying them to
 
 ## Community Templates
 
-You can also use a remote Git repository as a starter template by using the `--template` option with a git URL.
+You can also use a remote Git repository as a community template by using the `--template` option with a GitHub repository shorthand or full git URL.
 
 ```bash
+# Using GitHub shorthand (user/repo)
+npm create p5js my-project -- --template user/repo
+
+# Using full git URL
 npm create p5js my-project -- --template https://github.com/user/repo.git
 ```
 
 For example:
 
 ```bash
-npm create p5js my-project -- --template https://github.com/nbogie/p5-v2-ts-global-mode-starter.git
+npm create p5js my-project -- --template nbogie/p5-v2-ts-global-mode-starter
 ```
 
 This uses [degit](https://github.com/Rich-Harris/degit) to clone the template repository.
+
+> [!NOTE]
+> When using community templates, the `--language` and `--p5-mode` flags are not used. The template defines its own structure.
 
 ## Troubleshooting
 
