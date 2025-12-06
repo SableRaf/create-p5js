@@ -209,32 +209,21 @@ export async function directoryExists(dirPath) {
 }
 
 /**
- * Validates that a template name is one of the supported templates
+ * Checks if a template spec represents a remote template (GitHub repo)
  *
- * @param {string} template - The template name to validate
- * @returns {string|null} Error message if invalid, null if valid
+ * @param {string} template - The template spec to check
+ * @returns {boolean} True if remote template, false otherwise
  */
-export function validateTemplate(template) {
-  const validTemplates = ['basic', 'instance', 'typescript', 'empty'];
+export function isRemoteTemplateSpec(template) {
+  if (typeof template !== 'string') return false;
 
-  // Allow built-in templates
-  if (validTemplates.includes(template)) return null;
+  // Full URL
+  if (/^https?:\/\//.test(template)) return true;
 
-  // Allow remote templates specified as GitHub shorthand (user/repo or user/repo/path)
-  // or as full URLs (https://github.com/user/repo.git, etc.)
-  try {
-    if (typeof template === 'string') {
-      // Full URL
-      if (/^https?:\/\//.test(template)) return null;
+  // GitHub shorthand (user/repo or user/repo/subdir) contains a slash
+  if (/^[^\s]+\/[^\s]+/.test(template)) return true;
 
-      // GitHub shorthand (user/repo or user/repo/subdir) contains a slash
-      if (/^[^\s]+\/[^^\s]+/.test(template)) return null;
-    }
-  } catch (e) {
-    // fall through to error
-  }
-
-  return `Invalid template "${template}". Valid templates: ${validTemplates.join(', ')} or a GitHub repository (user/repo or URL)`;
+  return false;
 }
 
 /**
