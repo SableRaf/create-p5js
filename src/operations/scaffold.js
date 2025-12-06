@@ -207,6 +207,7 @@ export async function scaffold(args) {
       }
     }
 
+
     // Show summary of choices if not using --yes flag
     if (!args.yes && (args.template || args.version || args.mode || args.git || args.types === false)) {
       display.message('');
@@ -306,7 +307,7 @@ export async function scaffold(args) {
     const updatedHtml = injectP5Script(htmlContent, selectedVersion, selectedMode);
     await fs.writeFile(indexPath, updatedHtml, 'utf-8');
 
-    // Download TypeScript definitions for IntelliSense (all templates)
+    // Download TypeScript definitions
     let typeDefsVersion = null;
     if (args.types !== false) {
       const typesPath = path.join(targetPath, 'types');

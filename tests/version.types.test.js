@@ -1,10 +1,14 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import fs from 'fs/promises';
-import path from 'path';
-import { downloadTypeDefinitions } from '../src/version.js';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import fs from "fs/promises";
+import path from "path";
+import {
+  downloadTypeDefinitions,
+  parseVersion,
+  getTypesStrategy,
+} from "../src/version.js";
 
 let originalFetch;
-const tmpDir = path.join('tests', 'tmp-types');
+const tmpDir = path.join("tests", "tmp-types");
 
 beforeEach(async () => {
   originalFetch = globalThis.fetch;
@@ -16,94 +20,230 @@ afterEach(async () => {
   await fs.rm(tmpDir, { recursive: true, force: true });
 });
 
-describe('downloadTypeDefinitions fallback', () => {
-  it('falls back to latest when exact version not available', async () => {
-    // Mock sequence: first call for exact version -> not ok
-    // then fetchVersions (called inside) -> returns latest '1.9.0'
-    // then fetch for latest types -> ok with content
-    let call = 0;
-    globalThis.fetch = async (url) => {
-      call++;
-      if (call === 1) {
-        // exact version fetch -> 404
-        return { ok: false, status: 404 };
-      }
-
-      if (url.includes('/v1/package/npm/p5')) {
-        return {
-          ok: true,
-          json: async () => ({ tags: { latest: '1.9.0' }, versions: ['1.9.0', '1.8.0'] })
-        };
-      }
-
-      // latest type fetch -> ok
-      return {
-        ok: true,
-        text: async () => '// dummy types'
-      };
-    };
-
-    const actual = await downloadTypeDefinitions('0.0.1', tmpDir);
-    expect(actual).toBe('1.9.0');
-
-    // Verify both global.d.ts and p5.d.ts are downloaded for global mode (default)
-    const globalFileExists = await fs.stat(path.join(tmpDir, 'global.d.ts'))
-      .then(() => true)
-      .catch(() => false);
-
-    const p5FileExists = await fs.stat(path.join(tmpDir, 'p5.d.ts'))
-      .then(() => true)
-      .catch(() => false);
-
-    expect(globalFileExists).toBe(true);
-    expect(p5FileExists).toBe(true);
+describe("parseVersion", () => {
+  it("parses stable versions correctly", () => {
+    const result = parseVersion("1.9.0");
+    expect(result).toEqual({ major: 1, minor: 9, patch: 0, prerelease: null });
   });
 
-  it('downloads only p5.d.ts for instance mode template', async () => {
-    globalThis.fetch = async (url) => {
-      return {
-        ok: true,
-        text: async () => '// dummy types'
-      };
-    };
-
-    const actual = await downloadTypeDefinitions('1.9.0', tmpDir, null, 'instance');
-    expect(actual).toBe('1.9.0');
-
-    // Verify only p5.d.ts is downloaded for instance mode
-    const globalFileExists = await fs.stat(path.join(tmpDir, 'global.d.ts'))
-      .then(() => true)
-      .catch(() => false);
-
-    const p5FileExists = await fs.stat(path.join(tmpDir, 'p5.d.ts'))
-      .then(() => true)
-      .catch(() => false);
-
-    expect(globalFileExists).toBe(false);
-    expect(p5FileExists).toBe(true);
+  it("parses prerelease versions correctly", () => {
+    const result = parseVersion("2.1.0-rc.1");
+    expect(result).toEqual({
+      major: 2,
+      minor: 1,
+      patch: 0,
+      prerelease: "rc.1",
+    });
   });
 
-  it('downloads both files for basic template', async () => {
+  it("throws on invalid version strings", () => {
+    expect(() => parseVersion("invalid")).toThrow("Invalid semver version");
+  });
+});
+
+describe("getTypesStrategy", () => {
+  it("uses @types/p5 package for p5.js 1.x", () => {
+    const result = getTypesStrategy("1.9.0");
+    expect(result.useTypesPackage).toBe(true);
+    expect(result.reason).toContain("1.x");
+  });
+
+  it("uses bundled types for p5.js 2.x", () => {
+    const result = getTypesStrategy("2.0.2");
+    expect(result.useTypesPackage).toBe(false);
+    expect(result.reason).toContain("2.x");
+  });
+
+  it("uses bundled types for p5.js 2.0.0", () => {
+    const result = getTypesStrategy("2.0.0");
+    expect(result.useTypesPackage).toBe(false);
+    expect(result.reason).toContain("2.x");
+  });
+});
+
+describe("downloadTypeDefinitions for p5.js 1.x", () => {
+  it("copies minimal global.d.ts from repo for p5.js 1.x", async () => {
+    const result = await downloadTypeDefinitions(
+      "1.9.0",      // p5Version
+      tmpDir,       // targetDir
+      null,         // spinner
+      null          // template (global mode)
+    );
+
+    // Should return fixed version for reference
+    expect(result).toBe("1.7.7");
+
+    // Check that global.d.ts was copied
+    const globalDtsPath = path.join(tmpDir, "global.d.ts");
+    const content = await fs.readFile(globalDtsPath, "utf-8");
+
+    // Verify it contains the expected import statement
+    expect(content).toContain('import * as p5Global from "p5/global"');
+  });
+
+  it("works for any p5.js 1.x version without network requests", async () => {
+    // No network mocking needed - should copy from local file
+    const result = await downloadTypeDefinitions(
+      "1.4.0",
+      tmpDir,
+      null,
+      null
+    );
+
+    expect(result).toBe("1.7.7");
+
+    const globalDtsPath = path.join(tmpDir, "global.d.ts");
+    const exists = await fs.access(globalDtsPath).then(() => true).catch(() => false);
+    expect(exists).toBe(true);
+  });
+});
+
+describe("downloadTypeDefinitions for p5.js 2.x", () => {
+  it("downloads bundled types for p5.js 2.0.2+", async () => {
+    const fetchedUrls = [];
     globalThis.fetch = async (url) => {
+      fetchedUrls.push(url);
       return {
         ok: true,
-        text: async () => '// dummy types'
+        text: async () => "// dummy types",
       };
     };
 
-    const actual = await downloadTypeDefinitions('1.9.0', tmpDir, null, 'basic');
-    expect(actual).toBe('1.9.0');
+    const result = await downloadTypeDefinitions(
+      "2.0.2",      // p5Version
+      tmpDir,       // targetDir
+      null,         // spinner
+      null          // template (global mode)
+    );
 
-    // Verify both files are downloaded for basic (global mode) template
-    const globalFileExists = await fs.stat(path.join(tmpDir, 'global.d.ts'))
-      .then(() => true)
-      .catch(() => false);
+    // Should use exact version
+    expect(result).toBe("2.0.2");
 
-    const p5FileExists = await fs.stat(path.join(tmpDir, 'p5.d.ts'))
-      .then(() => true)
-      .catch(() => false);
+    // Should download from p5 package, not @types/p5
+    expect(fetchedUrls).toContain(
+      "https://cdn.jsdelivr.net/npm/p5@2.0.2/types/global.d.ts"
+    );
+    expect(fetchedUrls).toContain(
+      "https://cdn.jsdelivr.net/npm/p5@2.0.2/types/p5.d.ts"
+    );
+  });
 
-    expect(globalFileExists).toBe(true);
-    expect(p5FileExists).toBe(true);
+  it("falls back to 2.0.2 for p5.js 2.0.0", async () => {
+    const fetchedUrls = [];
+    globalThis.fetch = async (url) => {
+      fetchedUrls.push(url);
+      return {
+        ok: true,
+        text: async () => "// dummy types",
+      };
+    };
+
+    const result = await downloadTypeDefinitions(
+      "2.0.0",
+      tmpDir,
+      null,
+      null
+    );
+
+    // Should fallback to 2.0.2
+    expect(result).toBe("2.0.2");
+    expect(fetchedUrls).toContain(
+      "https://cdn.jsdelivr.net/npm/p5@2.0.2/types/global.d.ts"
+    );
+  });
+
+  it("falls back to 2.0.2 for p5.js 2.0.1", async () => {
+    const fetchedUrls = [];
+    globalThis.fetch = async (url) => {
+      fetchedUrls.push(url);
+      return {
+        ok: true,
+        text: async () => "// dummy types",
+      };
+    };
+
+    const result = await downloadTypeDefinitions(
+      "2.0.1",
+      tmpDir,
+      null,
+      null
+    );
+
+    expect(result).toBe("2.0.2");
+    expect(fetchedUrls).toContain(
+      "https://cdn.jsdelivr.net/npm/p5@2.0.2/types/global.d.ts"
+    );
+  });
+
+  it("falls back to 2.0.2 for p5.js 2.0.0-* pre-releases", async () => {
+    const fetchedUrls = [];
+    globalThis.fetch = async (url) => {
+      fetchedUrls.push(url);
+      return {
+        ok: true,
+        text: async () => "// dummy types",
+      };
+    };
+
+    const result = await downloadTypeDefinitions(
+      "2.0.0-rc.1",
+      tmpDir,
+      null,
+      null
+    );
+
+    expect(result).toBe("2.0.2");
+    expect(fetchedUrls).toContain(
+      "https://cdn.jsdelivr.net/npm/p5@2.0.2/types/global.d.ts"
+    );
+  });
+
+  it("downloads only p5.d.ts for instance mode", async () => {
+    const fetchedUrls = [];
+    globalThis.fetch = async (url) => {
+      fetchedUrls.push(url);
+      return {
+        ok: true,
+        text: async () => "// dummy types",
+      };
+    };
+
+    await downloadTypeDefinitions(
+      "2.1.0",
+      tmpDir,
+      null,
+      "instance"    // template (instance mode)
+    );
+
+    // Should only download p5.d.ts for instance mode
+    const typesFetches = fetchedUrls.filter(url => url.endsWith(".d.ts"));
+    expect(typesFetches).toHaveLength(1);
+    expect(typesFetches[0]).toContain("p5.d.ts");
+    expect(typesFetches[0]).not.toContain("global.d.ts");
+  });
+});
+
+describe("downloadTypeDefinitions error handling", () => {
+  it("throws error when download fails for p5.js 2.x", async () => {
+    globalThis.fetch = async () => ({
+      ok: false,
+      status: 404,
+    });
+
+    await expect(
+      downloadTypeDefinitions("2.1.0", tmpDir, null, null)
+    ).rejects.toThrow("Failed to download");
+  });
+
+  it("throws error with network failure message", async () => {
+    globalThis.fetch = async () => {
+      const error = new Error("fetch failed");
+      error.code = "ENOTFOUND";
+      throw error;
+    };
+
+    await expect(
+      downloadTypeDefinitions("2.1.0", tmpDir, null, null)
+    ).rejects.toThrow("Unable to download TypeScript definitions");
   });
 });

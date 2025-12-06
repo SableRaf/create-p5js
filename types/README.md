@@ -1,0 +1,5 @@
+### 1.x type definitions
+For p5.js 1.x, we include a minimal `global.d.ts` file (initially found [here](https://github.com/nbogie/p5-v1-js-typechecked-global-mode-starter/blob/main/global.d.ts)) for p5.js 1.x in `types/default/v1`. It tells the editor (VS Code or similar) to auto-acquire type definitions from `@types/p5` (DefinitelyTyped repo). Note that these are not up to date with the latest p5.js 1.x releases (only goes up to version 1.7.7, whereas the latest p5.js version at the time of writing is 1.11.11). For better type support, consider using p5.js 2.x instead.
+
+### 2.x type definitions
+Type definitions for p5.js 2.x will be downloaded during project creation from the official p5.js CDN at https://cdn.jsdelivr.net/npm/p5/types/. These definitions are maintained by the p5.js team and kept up to date with the latest releases. Note that version 2.0.0 and 2.0.1 do not include type definitions, so if you specify those versions, the type definitions for 2.0.2 will be used instead.
