@@ -53,7 +53,8 @@ create-p5/
 └── types/
     └── default/
         └── v1/
-            └── global.d.ts   # Minimal type definitions for p5.js 1.x
+            └── global.d.ts   # Minimal ATA type definitions for p5.js 1.x global-mode
+            └── instance.d.ts   # Minimal ATA type definitions for p5.js 1.x instance-mode
 ```
 
 ## Key Dependencies
@@ -112,7 +113,7 @@ The `version.js` module:
 - Shows latest 15 versions in interactive mode
 - Downloads p5.js files from jsdelivr CDN when using local mode
 - Uses a **simple two-tier strategy** for TypeScript definitions:
-  - **p5.js 1.x**: Copies minimal `global.d.ts` from repo that tells VS Code to auto-acquire from `@types/p5`
+  - **p5.js 1.x**: Copies minimal `global.d.ts` (for global mode) or `p5.d.ts` (for instance mode) from repo that tells VS Code to auto-acquire from `@types/p5`
   - **p5.js 2.x (2.0.2+)**: Downloads bundled types from p5 package itself
   - **p5.js 2.0.0-2.0.1**: Hardcoded fallback to download types from 2.0.2
 
@@ -308,10 +309,11 @@ if (response.ok) {
 
 ### TypeScript Type Definitions Strategy
 
-The tool uses a **simple two-tier strategy** for TypeScript definitions based on p5.js major version:
+The tool uses a **simple two-tier strategy** for TypeScript definitions based on p5.js major version (with modifications for global-mode / instance-mode).
 
-**For p5.js 1.x:**
-Copies minimal `global.d.ts` from `types/default/v1/global.d.ts` in the repo. This file tells VS Code to auto-acquire type definitions from the `@types/p5` package:
+**For p5.js 1.x global-mode**
+Copies minimal `global.d.ts` from `types/default/v1/global.d.ts` in the repo. This file tells VS Code to auto-acquire type definitions from the `@types/p5` package and makes them available globally.
+
 ```javascript
 // Contents of types/default/v1/global.d.ts
 import * as p5Global from "p5/global";
@@ -319,6 +321,16 @@ import module from "p5";
 export = module;
 export as namespace p5;
 ```
+**For p5.js 1.x instance-mode**
+Copies minimal `instance.d.ts` from `types/default/v1/instance.d.ts` in the repo. This file tells VS Code to auto-acquire type definitions from the `@types/p5` package and imports globally _only_ the type for the `p5` module.
+
+```javascript
+// Contents of types/default/v1/instance.d.ts
+import module from "p5";
+export = module;
+export as namespace p5;
+```
+
 - **No network requests needed** - file is bundled with create-p5
 - **No version matching** - VS Code automatically uses latest compatible @types/p5
 - **Always returns `1.7.7`** as typeDefsVersion for reference only
