@@ -2,7 +2,10 @@
   "prompt.projectPath.message": "Where should we create your p5.js sketch?",
   "prompt.projectPath.placeholder": ". (current directory)",
   "prompt.projectPath.error.absolutePath": "Please use a relative path (e.g., \"./my-sketch\" or \"my-sketch\")",
-  "prompt.projectPath.error.invalidChars": "Path contains invalid characters",
+  "prompt.projectPath.error.invalidChars": "Path contains invalid characters (< > : \" | ? * / \\ or control characters). Use letters, numbers, hyphens, and underscores.",
+  "prompt.projectPath.error.invalidEnding": "Path cannot end with a space or dot. Please remove trailing spaces or dots.",
+  "prompt.projectPath.error.reservedName": "This is a reserved system name (CON, PRN, AUX, NUL, COM1-9, LPT1-9). Please choose a different name.",
+  "prompt.projectPath.error.tooLong": "Path name is too long (maximum 255 characters). Please use a shorter name.",
 
   "prompt.customize.message": "How would you like to set up your project?",
   "prompt.customize.option.no.label": "Quick start",

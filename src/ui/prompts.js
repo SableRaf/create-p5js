@@ -6,6 +6,7 @@
 
 import * as p from '@clack/prompts';
 import { t } from '../i18n/index.js';
+import { isValidPathName } from '../utils.js';
 
 /**
  * Check if user cancelled a prompt
@@ -39,9 +40,10 @@ export async function promptProjectPath(initialValue) {
         return t('prompt.projectPath.error.absolutePath');
       }
 
-      // Check for invalid characters
-      if (/[<>:"|?*]/.test(trimmed)) {
-        return t('prompt.projectPath.error.invalidChars');
+      // Check for invalid path name with detailed error messages
+      const errorKey = isValidPathName(trimmed);
+      if (errorKey) {
+        return t(errorKey);
       }
     }
   });

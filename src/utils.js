@@ -310,3 +310,77 @@ export function generateProjectName() {
   };
   return uniqueNamesGenerator(config);
 }
+
+/**
+ * Checks if a path name contains invalid characters.
+ * Uses restrictions similar to Windows file naming conventions for cross-platform safety.
+ *
+ * @param {string} trimmedPath - The trimmed path name to validate
+ * @returns {boolean} True if valid, false otherwise
+ */
+export function hasValidCharacters(trimmedPath) {
+  return !/[<>:"|?*\/\\\x00-\x1f]/.test(trimmedPath);
+}
+
+/**
+ * Checks if a path name doesn't end with whitespace or dot.
+ *
+ * @param {string} trimmedPath - The trimmed path name to validate
+ * @returns {boolean} True if valid, false otherwise
+ */
+export function hasValidEnding(trimmedPath) {
+  return !/[\s.]$/.test(trimmedPath);
+}
+
+/**
+ * Checks if a path name is not a reserved Windows name.
+ *
+ * @param {string} trimmedPath - The trimmed path name to validate
+ * @returns {boolean} True if valid, false otherwise
+ */
+export function isNotReservedName(trimmedPath) {
+  return !/^(con|prn|aux|nul|com[0-9]|lpt[0-9])$/i.test(trimmedPath.split('.')[0]);
+}
+
+/**
+ * Checks if a path name length is within limits.
+ *
+ * @param {string} trimmedPath - The trimmed path name to validate
+ * @returns {boolean} True if valid, false otherwise
+ */
+export function hasValidLength(trimmedPath) {
+  return trimmedPath.length <= 255;
+}
+
+/**
+ * Validates a path name with detailed error messages.
+ * Uses cross-platform file naming restrictions for maximum compatibility.
+ *
+ * @param {string} pathName - The path name to validate
+ * @returns {string|null} Specific error message key if invalid, null if valid
+ */
+export function isValidPathName(pathName) {
+  const trimmed = pathName.trim();
+
+  // Check for invalid characters first (most common issue)
+  if (!hasValidCharacters(trimmed)) {
+    return 'prompt.projectPath.error.invalidChars';
+  }
+
+  // Check for invalid ending (dot or whitespace)
+  if (!hasValidEnding(trimmed)) {
+    return 'prompt.projectPath.error.invalidEnding';
+  }
+
+  // Check for reserved Windows names
+  if (!isNotReservedName(trimmed)) {
+    return 'prompt.projectPath.error.reservedName';
+  }
+
+  // Check length limit
+  if (!hasValidLength(trimmed)) {
+    return 'prompt.projectPath.error.tooLong';
+  }
+
+  return null; // Valid
+}
