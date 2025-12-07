@@ -149,7 +149,7 @@ export async function downloadP5Files(version, targetDir, spinner = null) {
 /**
  * Downloads TypeScript type definitions for p5.js.
  * Uses a simple two-tier strategy:
- * - For p5.js 1.x: Copies minimal global.d.ts (global-mode) or p5.d.ts (instance.mode) from repo (tells VS Code to auto-acquire from @types/p5)
+ * - For p5.js 1.x: Copies minimal global.d.ts (global-mode) or instance.d.ts (instance.mode) from repo (tells VS Code to auto-acquire from @types/p5)
  * - For p5.js 2.x: Downloads bundled types from p5 package with hardcoded fallback for 2.0.0-2.0.1
  * For instance-mode sketches, downloads only the main definition file.
  * For global-mode sketches, downloads both global.d.ts and main definition file.
