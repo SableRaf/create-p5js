@@ -121,7 +121,7 @@ The `version.js` module:
 
 ### Philosophy
 Follow incremental development in 6-10 stages with 2-4 atomic commits per stage:
-1. **Proof of Concept** - Hardcoded, single feature, validates approach (only if new architecture)
+1. **Proof of Concept (only if new architecture)** - Hardcoded, single feature, validates approach
 2. **Dynamic Input** - Real data, user choices
 3. **Persistence** - Save/load state
 4. **Alternative Modes** - Different paths through the system
@@ -141,13 +141,15 @@ Follow incremental development in 6-10 stages with 2-4 atomic commits per stage:
 Format: `type: short description` where type is `feat`, `fix`, `refactor`, `docs`, `test`, or `style`
 
 ### Checkpoints
-After each stage, ensure something is demo-able and working before proceeding. STOP at checkpoints for approval.
+After each stage, ensure something is demo-able and working before proceeding. 
 
-After approval, save the checkpoint summary in `docs/CHECKPOINTS.md`.
+✋ STOP SIGN: At each checkpoint, halt development, demo the feature, and get approval before proceeding to the next stage.
+
+After approval, you MUST save the checkpoint summary in `.claude/CHECKPOINTS.md`.
 
 ## Code Documentation Standards
 
-**All functions and methods MUST have JSDoc comments** with:
+**All functions, class constructors and methods MUST have JSDoc comments** with:
 - Description of what the function does
 - `@param` tags for each parameter with type and description
 - `@returns` tag with return type and description
@@ -564,6 +566,22 @@ LANG=fr_FR.UTF-8 npm create p5@latest
 - ✅ Consistent messaging
 - ✅ Testable without UI
 - ✅ Clear separation of concerns
+
+## Testing Strategy
+
+### Unit Tests
+Use `vitest run` to run all unit tests in `tests/` directory.
+
+When modifying a single module, only run tests for that module. 
+
+For example, to run tests for `moduleName.js`:
+
+```bash
+npx vitest run tests/moduleName.test.js
+```
+
+### File Generation
+When tests generate files, they should write to a temporary directory (e.g., `tests/temp/`) and clean up after themselves.
 
 ## Important Architectural Principles
 
