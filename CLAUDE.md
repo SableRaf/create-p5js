@@ -45,6 +45,7 @@ create-p5/
 │   ├── git.js               # Git operations
 │   └── utils.js             # Utilities (validation, file ops, etc.)
 ├── templates/
+│   ├── minimal-global-js/   # Minimal setup (HTML, CSS, JS only - no jsconfig.json)
 │   ├── basic-global-js/     # JavaScript + Global mode
 │   ├── basic-global-ts/     # TypeScript + Global mode
 │   ├── basic-instance-js/   # JavaScript + Instance mode
@@ -78,9 +79,14 @@ Entry point in `cli.js` detects if running in existing project (checks for `p5-c
 1. Parse arguments or run interactive prompts
 2. Copy selected template
 3. Inject p5.js script tag with chosen version/mode (CDN or local)
-4. Download TypeScript definitions to `types/` directory
+4. Download TypeScript definitions to `types/` directory (except Basic setup)
 5. Create `p5-config.json` metadata file
 6. Optionally run `git init`
+
+**Three Setup Types:**
+- **Basic**: Minimal project with only HTML, CSS, and JS files. No TypeScript definitions, no jsconfig.json, no types directory. Uses `minimal-global-js` template.
+- **Standard**: Full setup with helpful defaults (JavaScript + Global mode + CDN + latest version + TypeScript definitions). Uses `basic-global-js` template.
+- **Custom**: User chooses all options interactively (language, mode, version, delivery mode). Uses template based on selections.
 
 ### 2. Updating Existing Projects
 The `update.js` module handles:
@@ -367,10 +373,13 @@ https://cdn.jsdelivr.net/npm/p5@{version}/lib/p5.min.js
 
 ### Usage Patterns
 ```bash
-# Interactive mode
+# Interactive mode (prompts for Basic, Standard, or Custom setup)
 npm create p5@latest
 
-# Non-interactive with flags
+# Non-interactive with --yes flag (uses Standard setup)
+npm create p5@latest my-sketch -- --yes
+
+# Non-interactive with config flags (uses Custom setup)
 npm create p5@latest my-sketch -- --language typescript --p5-mode instance --mode cdn --yes
 
 # With community template
@@ -382,6 +391,11 @@ npx create-p5 update --version 1.10.0
 # Switch delivery mode
 npx create-p5 mode local
 ```
+
+**Note on Setup Types:**
+- Interactive mode without flags: User is prompted to choose Basic, Standard, or Custom
+- `--yes` flag: Automatically uses Standard setup (full defaults)
+- Config flags (`--language`, `--p5-mode`, `--version`, `--mode`): Forces Custom setup
 
 ## Internationalization (i18n) Architecture
 
