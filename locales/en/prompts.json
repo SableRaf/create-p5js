@@ -7,11 +7,13 @@
   "prompt.projectPath.error.reservedName": "This is a reserved system name (CON, PRN, AUX, NUL, COM1-9, LPT1-9). Please choose a different name.",
   "prompt.projectPath.error.tooLong": "Path name is too long (maximum 255 characters). Please use a shorter name.",
 
-  "prompt.customize.message": "How would you like to set up your project?",
-  "prompt.customize.option.no.label": "Quick start",
-  "prompt.customize.option.no.hint": "Creates a project with default settings",
-  "prompt.customize.option.yes.label": "Configure manually",
-  "prompt.customize.option.yes.hint": "Choose p5.js version, mode, and additional options",
+  "prompt.setupType.message": "How would you like to set up your project?",
+  "prompt.setupType.option.basic.label": "Basic",
+  "prompt.setupType.option.basic.hint": "Minimal project (HTML, CSS, JS only)",
+  "prompt.setupType.option.standard.label": "Standard",
+  "prompt.setupType.option.standard.hint": "Full setup with helpful defaults and type definitions",
+  "prompt.setupType.option.custom.label": "Configure manually",
+  "prompt.setupType.option.custom.hint": "Choose p5.js version, mode, and additional options",
 
   "prompt.languageMode.message": "Select language and mode:",
   "prompt.languageMode.group.language.label": "Language",
