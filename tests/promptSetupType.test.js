@@ -15,14 +15,13 @@ describe('promptSetupType', () => {
     expect(typeof prompts.promptSetupType).toBe('function');
   });
 
-  it('should return a Promise', () => {
+  it('should return a Promise', async () => {
     // Import and verify it's an async function
-    import('../src/ui/prompts.js').then(prompts => {
-      const result = prompts.promptSetupType();
-      expect(result).toBeInstanceOf(Promise);
-      // Cancel the prompt to avoid hanging
-      result.catch(() => {}); // Ignore cancellation
-    });
+    const prompts = await import('../src/ui/prompts.js');
+    const result = prompts.promptSetupType();
+    expect(result).toBeInstanceOf(Promise);
+    // Cancel the prompt to avoid hanging
+    result.catch(() => {}); // Ignore cancellation
   });
 });
 
