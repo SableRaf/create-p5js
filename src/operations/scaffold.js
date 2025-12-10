@@ -55,7 +55,7 @@ export async function scaffold(args) {
 
   // Determine setup type (only in interactive mode without flags)
   let setupType = 'standard';
-  const hasConfigFlags = args.language || args['p5-mode'] || args.version || args.mode || args.template;
+  const hasConfigFlags = args.language || args['p5-mode'] || args.version || args.mode;
 
   if (!args.yes && !hasConfigFlags) {
     // Interactive mode without config flags: ask for setup type
