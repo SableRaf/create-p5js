@@ -5,6 +5,7 @@
   "info.includePrerelease": "Including pre-release versions (RC, beta, alpha)",
   "info.continueWithoutTypes": "Continuing without TypeScript definitions...",
   "info.skipTypes": "Skipping TypeScript definitions download (--no-types flag)",
+  "info.skipTypesBasic": "Basic setup: no TypeScript definitions included",
   "info.stackTrace": "Stack trace:",
 
   "info.config.header": "Project configuration:",
