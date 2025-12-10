@@ -394,8 +394,8 @@ export async function scaffold(args) {
       display.warn('info.skipTypes');
     }
 
-    // Create p5-config.json in project root
-    const configPath = path.join(targetPath, 'p5-config.json');
+    // Create .p5-config.json in project root
+    const configPath = path.join(targetPath, '.p5-config.json');
     await createConfig(configPath, {
       version: selectedVersion,
       mode: selectedMode,

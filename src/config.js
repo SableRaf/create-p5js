@@ -1,11 +1,11 @@
 /**
- * ConfigManager - Handles p5-config.json read/write operations
+ * ConfigManager - Handles .p5-config.json read/write operations
  */
 
 import { readJSON, writeJSON, fileExists } from './utils.js';
 
 /**
- * Creates a new p5-config.json file with project metadata
+ * Creates a new .p5-config.json file with project metadata
  *
  * @param {string} configPath - The path where the config file should be created
  * @param {Object} options - Configuration options
@@ -30,7 +30,7 @@ export async function createConfig(configPath, options) {
 }
 
 /**
- * Reads an existing p5-config.json file
+ * Reads an existing .p5-config.json file
  *
  * @param {string} configPath - The path to the config file
  * @returns {Promise<Object|null>} The configuration object with {version, mode, language, p5Mode, typeDefsVersion, lastUpdated} or null if file doesn't exist
@@ -40,7 +40,7 @@ export async function readConfig(configPath) {
 }
 
 /**
- * Checks if a p5-config.json file exists at the given path
+ * Checks if a .p5-config.json file exists at the given path
  *
  * @param {string} configPath - The path to check for the config file
  * @returns {Promise<boolean>} True if the config file exists, false otherwise

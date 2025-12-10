@@ -38,7 +38,7 @@ create-p5/
 │   ├── operations/          # Business logic (NO copy)
 │   │   ├── scaffold.js      # New project creation workflow
 │   │   └── update.js        # Update existing projects workflow
-│   ├── config.js            # p5-config.json management
+│   ├── config.js            # .p5-config.json management
 │   ├── version.js           # Version fetching from jsdelivr
 │   ├── htmlManager.js       # HTML manipulation and script tag injection
 │   ├── templateFetcher.js   # Remote template fetching
@@ -75,12 +75,12 @@ create-p5/
 ## Core Functionality
 
 ### 1. Scaffolding New Projects
-Entry point in `cli.js` detects if running in existing project (checks for `p5-config.json`) or creating new project. The `scaffold.js` module handles:
+Entry point in `cli.js` detects if running in existing project (checks for `.p5-config.json`) or creating new project. The `scaffold.js` module handles:
 1. Parse arguments or run interactive prompts
 2. Copy selected template
 3. Inject p5.js script tag with chosen version/mode (CDN or local)
 4. Download TypeScript definitions to `types/` directory (except Basic setup)
-5. Create `p5-config.json` metadata file
+5. Create `.p5-config.json` metadata file
 6. Optionally run `git init`
 
 **Three Setup Types:**
@@ -177,7 +177,7 @@ async function downloadTypes(version, verbose = false) {
 
 ## Key Technical Details
 
-### p5-config.json Schema
+### .p5-config.json Schema
 Created during scaffolding, used by update commands. Stores minimal metadata about the project setup:
 ```json
 {
@@ -209,7 +209,7 @@ Components receive dependencies through constructor parameters rather than creat
 ```javascript
 // ConfigManager depends on FileManager
 const fileManager = new FileManager();
-const configManager = new ConfigManager(fileManager, 'sketch/p5-config.json');
+const configManager = new ConfigManager(fileManager, 'sketch/.p5-config.json');
 ```
 
 #### 2. Single Responsibility Principle
@@ -357,7 +357,7 @@ https://cdn.jsdelivr.net/npm/p5@{version}/types/p5.d.ts      # For instance mode
 - `getTypesStrategy(version)` determines which strategy to use based on major version
 - Returns `{ useTypesPackage: boolean, reason: string }`
 - `downloadTypeDefinitions(p5Version, targetDir, spinner, template)` executes the appropriate strategy
-- Stores actual types version in `typeDefsVersion` field of `p5-config.json`
+- Stores actual types version in `typeDefsVersion` field of `.p5-config.json`
 - **No user prompts** - fully deterministic based on version number
 - **No validation requests** - faster execution, simpler code
 

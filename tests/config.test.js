@@ -4,10 +4,10 @@ import fs from 'fs/promises';
 import path from 'path';
 
 const tmpDir = path.join('tests', 'tmp-config');
-const configPath = path.join(tmpDir, 'p5-config.json');
+const configPath = path.join(tmpDir, '.p5-config.json');
 
 describe('ConfigManager', () => {
-  it('creates and reads p5-config.json', async () => {
+  it('creates and reads .p5-config.json', async () => {
     await fs.mkdir(tmpDir, { recursive: true });
 
     await createConfig(configPath, {

@@ -8,7 +8,7 @@ vi.mock('../src/config.js', () => ({
 import { update } from '../src/operations/update.js';
 
 describe('update workflow', () => {
-  it('exits when no p5-config.json found', async () => {
+  it('exits when no .p5-config.json found', async () => {
     const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {});
     await update();
     expect(exitSpy).toHaveBeenCalledWith(1);

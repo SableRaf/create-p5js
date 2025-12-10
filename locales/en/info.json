@@ -28,6 +28,7 @@
   "info.defaultMode": "Using default delivery mode: cdn",
 
   "info.update.cancelled": "Update cancelled.",
+  "info.update.migratedConfig": "Found old 'p5-config.json' (automatically renamed to '.p5-config.json')",
   "info.update.sameVersion": "Selected version is the same as current version. No changes made.",
   "info.update.updating": "Updating from version {oldVersion} to {newVersion}...",
   "info.update.switchingMode": "Switching from {oldMode} to {newMode} mode...",

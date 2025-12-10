@@ -106,7 +106,7 @@ npx create-p5js update
 This command will let you update the p5.js version and/or mode, applying them to your project while preserving your custom sketch code.
 
 > [!NOTE]
-> The `update` command only works for projects originally created with `create-p5js` (i.e., those containing a `p5-config.json` file).
+> The `update` command only works for projects originally created with `create-p5js` (i.e., those containing a `.p5-config.json` file).
 
 ## Community Templates
 

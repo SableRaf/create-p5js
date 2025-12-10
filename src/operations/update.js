@@ -5,6 +5,7 @@
  */
 
 import path from 'path';
+import fs from 'fs/promises';
 import minimist from 'minimist';
 import { readConfig, createConfig } from '../config.js';
 import { fetchVersions, downloadP5Files, downloadTypeDefinitions } from '../version.js';
@@ -33,7 +34,15 @@ export async function update(projectDir = process.cwd()) {
     }
   });
 
-  const configPath = path.join(projectDir, 'p5-config.json');
+  const configPath = path.join(projectDir, '.p5-config.json');
+  const oldConfigPath = path.join(projectDir, 'p5-config.json');
+
+  // Check for old config file and migrate if found (show warning later)
+  let didMigrate = false;
+  if (await fileExists(oldConfigPath)) {
+    await fs.rename(oldConfigPath, configPath);
+    didMigrate = true;
+  }
 
   // Read existing configuration
   const config = await readConfig(configPath);
@@ -60,6 +69,11 @@ export async function update(projectDir = process.cwd()) {
       types: config.typeDefsVersion,
       timestamp: config.lastUpdated
     });
+  }
+
+  // Show migration warning after config display (more visible)
+  if (didMigrate) {
+    display.warn('info.update.migratedConfig');
   }
 
   // Show update options
@@ -137,8 +151,8 @@ async function updateVersion(projectDir, config, options = {}) {
     display.success('info.update.updatedTypes', { version: typeDefsVersion });
   }
 
-  // Update p5-config.json
-  const configPath = path.join(projectDir, 'p5-config.json');
+  // Update .p5-config.json
+  const configPath = path.join(projectDir, '.p5-config.json');
   await createConfig(configPath, {
     version: newVersion,
     mode: config.mode,
@@ -228,8 +242,8 @@ async function switchMode(projectDir, config, options = {}) {
     display.success('info.update.updatedScript');
   }
 
-  // Update p5-config.json
-  const configPath = path.join(projectDir, 'p5-config.json');
+  // Update .p5-config.json
+  const configPath = path.join(projectDir, '.p5-config.json');
   await createConfig(configPath, {
     version: config.version,
     mode: newMode,
