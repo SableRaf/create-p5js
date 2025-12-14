@@ -251,17 +251,14 @@ async function release() {
         console.error('❌ Invalid version format');
         process.exit(1);
       }
-      if (customVersion === currentVersion) {
-        console.error('❌ Custom version must differ from the current version in package.json.');
-        console.error('   Either pick a new version or revert the existing bump before retrying.');
-        process.exit(1);
-      }
       break;
     default:
       console.error('❌ Invalid choice');
       process.exit(1);
   }
 
+  const customMatchesCurrentVersion =
+    Boolean(customVersion && customVersion === currentVersion);
   const targetVersion = customVersion || calculateNextVersion(currentVersion, versionType);
   const targetTag = `v${targetVersion}`;
 
@@ -270,9 +267,15 @@ async function release() {
   // Step 4: Update version and create tag
   console.log('\n📝 Updating version...');
   if (customVersion) {
-    exec(`npm version ${customVersion} --no-git-tag-version`, true);
-    exec('git add package.json');
-    exec(`git commit -m "chore: bump version to ${customVersion}"`);
+    if (customMatchesCurrentVersion) {
+      console.log(
+        `ℹ️  package.json already reflects ${customVersion}. Skipping version bump command.`
+      );
+    } else {
+      exec(`npm version ${customVersion} --no-git-tag-version`, true);
+      exec('git add package.json');
+      exec(`git commit -m "chore: bump version to ${customVersion}"`);
+    }
     exec(`git tag ${targetTag}`);
   } else {
     exec(`npm version ${versionType}`);
