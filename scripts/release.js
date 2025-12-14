@@ -129,13 +129,15 @@ function githubReleaseExists(tag) {
     exec(`gh release view ${tag}`, { silent: true, allowFailure: true });
     return true;
   } catch (error) {
-    if (error?.code === 'ENOENT' || error?.status === 127) {
+    const exitCode = error?.status ?? error?.code;
+
+    if (exitCode === 'ENOENT' || exitCode === 127) {
       console.warn('⚠️  GitHub CLI not available. Skipping GitHub release validation.');
       return false;
     }
 
     // gh returns exit code 1 when the release/tag does not exist.
-    if (error?.status === 1) {
+    if (exitCode === 1) {
       return false;
     }
 
@@ -247,6 +249,11 @@ async function release() {
       customVersion = await prompt('Enter custom version (e.g., 1.2.3): ');
       if (!/^\d+\.\d+\.\d+(-[\w.]+)?$/.test(customVersion)) {
         console.error('❌ Invalid version format');
+        process.exit(1);
+      }
+      if (customVersion === currentVersion) {
+        console.error('❌ Custom version must differ from the current version in package.json.');
+        console.error('   Either pick a new version or revert the existing bump before retrying.');
         process.exit(1);
       }
       break;
