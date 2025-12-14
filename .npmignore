@@ -6,6 +6,7 @@ docs/
 coverage/
 .vscode/
 .claude/
+.instructions/
 images/
 .gitattributes
 .gitignore
