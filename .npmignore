@@ -7,6 +7,7 @@ coverage/
 .vscode/
 .claude/
 images/
+.instructions/
 .gitattributes
 .gitignore
 *.tgz
