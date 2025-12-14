@@ -26,13 +26,21 @@ const PACKAGE_NAME = JSON.parse(readFileSync('./package.json', 'utf8')).name;
  * @param {boolean} [silent=false] - Whether to suppress output
  * @returns {string} The command output
  */
-function exec(command, silent = false) {
+function exec(command, options = {}) {
+  const normalizedOptions =
+    typeof options === 'boolean' ? { silent: options } : options;
+  const { silent = false, allowFailure = false } = normalizedOptions;
+
   try {
     return execSync(command, {
       encoding: 'utf8',
       stdio: silent ? 'pipe' : 'inherit'
     });
   } catch (error) {
+    if (allowFailure) {
+      throw error;
+    }
+
     console.error(`\n❌ Command failed: ${command}`);
     process.exit(1);
   }
@@ -85,7 +93,10 @@ function getCurrentVersion() {
  */
 function getPublishedVersion() {
   try {
-    const result = exec(`npm view ${PACKAGE_NAME} version`, true);
+    const result = exec(`npm view ${PACKAGE_NAME} version`, {
+      silent: true,
+      allowFailure: true
+    });
     return result.trim();
   } catch (error) {
     return null;
@@ -115,9 +126,20 @@ function gitTagExists(tag) {
  */
 function githubReleaseExists(tag) {
   try {
-    exec(`gh release view ${tag}`, true);
+    exec(`gh release view ${tag}`, { silent: true, allowFailure: true });
     return true;
   } catch (error) {
+    if (error?.code === 'ENOENT' || error?.status === 127) {
+      console.warn('⚠️  GitHub CLI not available. Skipping GitHub release validation.');
+      return false;
+    }
+
+    // gh returns exit code 1 when the release/tag does not exist.
+    if (error?.status === 1) {
+      return false;
+    }
+
+    console.warn('⚠️  Unable to verify GitHub release. Skipping GitHub release validation.');
     return false;
   }
 }
