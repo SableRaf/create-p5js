@@ -17,7 +17,7 @@ async function main() {
   // Parse command line arguments
   const args = minimist(process.argv.slice(2), {
     boolean: ['yes', 'git', 'no-types', 'help', 'verbose', 'include-prerelease', 'silent'],
-    string: ['template', 'version', 'mode'],
+    string: ['template', 'version', 'mode', 'type'],
     alias: {
       y: 'yes',
       g: 'git',

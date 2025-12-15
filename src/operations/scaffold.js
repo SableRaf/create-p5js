@@ -16,7 +16,7 @@ import * as display from '../ui/display.js';
 import * as prompts from '../ui/prompts.js';
 
 // Business utilities
-import { copyTemplateFiles, validateProjectName, directoryExists, validateMode, validateVersion, validateLanguage, validateP5Mode, getTemplateName, generateProjectName, isRemoteTemplateSpec } from '../utils.js';
+import { copyTemplateFiles, validateProjectName, directoryExists, validateMode, validateVersion, validateLanguage, validateP5Mode, validateSetupType, getTemplateName, generateProjectName, isRemoteTemplateSpec } from '../utils.js';
 import { fetchVersions, downloadP5Files, downloadTypeDefinitions } from '../version.js';
 import { injectP5Script } from '../htmlManager.js';
 import { createConfig } from '../config.js';
@@ -53,23 +53,29 @@ export async function scaffold(args) {
     }
   }
 
-  // Determine setup type (only in interactive mode without flags)
+  // Determine setup type (allow override via --type flag)
   let setupType = 'standard';
   const hasConfigFlags = args.language || args['p5-mode'] || args.version || args.mode;
 
-  if (!args.yes) {
-    if (!hasConfigFlags) {
-      // Interactive mode without config flags: ask for setup type
-      setupType = await prompts.promptSetupType();
-      if (prompts.isCancel(setupType)) {
-        display.cancel('prompt.cancel.sketchCreation');
-      }
-    } else {
-      // If user provided config flags interactively, they clearly want to customize
-      setupType = 'custom';
+  if (args.type) {
+    const typeError = validateSetupType(args.type);
+    if (typeError) {
+      display.error('error.invalidSetupType');
+      display.message(typeError);
+      process.exit(1);
     }
+    setupType = args.type;
+  } else if (!args.yes && !hasConfigFlags) {
+    // Interactive mode without config flags: ask for setup type
+    setupType = await prompts.promptSetupType();
+    if (prompts.isCancel(setupType)) {
+      display.cancel('prompt.cancel.sketchCreation');
+    }
+  } else if (hasConfigFlags) {
+    // If user provided config flags, they clearly want to customize
+    setupType = 'custom';
   }
-  // If --yes flag, setupType remains 'standard' (use defaults)
+  // If --yes flag without --type, setupType remains 'standard' (use defaults)
 
   // Normalize the path
   projectPath = projectPath.trim() || '.';
@@ -501,6 +507,6 @@ export async function scaffold(args) {
     ];
     display.note(helpLines, 'error.persistHelp.title');
 
-    display.outro(t('note.success.failed'), 1);
+    process.exit(1);
   }
 }
