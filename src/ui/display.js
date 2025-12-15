@@ -10,10 +10,36 @@ import { t } from '../i18n/index.js';
 
 let silentModeEnabled = false;
 
+const SUPPRESSIBLE_TYPES = new Set([
+  'intro',
+  'outro',
+  'cancel',
+  'message',
+  'info',
+  'success',
+  'note',
+  'spinner'
+]);
+
 /**
- * Enable or disable silent mode for all display output.
+ * Determine if output should be suppressed based on silent mode settings.
+ * Errors (and warnings) should always be shown so users can diagnose failures.
  *
- * @param {boolean} enabled - Whether to silence all display output
+ * @param {string} type - Type of message being displayed
+ * @returns {boolean} Whether the message should be suppressed
+ */
+function shouldSuppress(type) {
+  if (!silentModeEnabled) {
+    return false;
+  }
+
+  return SUPPRESSIBLE_TYPES.has(type);
+}
+
+/**
+ * Enable or disable silent mode for non-critical display output.
+ *
+ * @param {boolean} enabled - Whether to silence informational output
  */
 export function setSilentMode(enabled) {
   silentModeEnabled = Boolean(enabled);
@@ -23,22 +49,24 @@ export function setSilentMode(enabled) {
  * Show intro banner with branding
  */
 export function intro() {
-  if (silentModeEnabled) {
+  if (shouldSuppress('intro')) {
     return;
   }
   p.intro(bgMagenta(white(t('cli.intro'))));
 }
 
 /**
- * Show outro message and exit
+ * Show outro message and exit with specified code.
+ *
  * @param {string} message - The outro message (already translated)
+ * @param {number} [exitCode=0] - Exit code to use when terminating
  */
-export function outro(message) {
-  if (silentModeEnabled) {
-    process.exit(0);
+export function outro(message, exitCode = 0) {
+  if (shouldSuppress('outro')) {
+    process.exit(exitCode);
   }
   p.outro(message);
-  process.exit(0);
+  process.exit(exitCode);
 }
 
 /**
@@ -46,7 +74,7 @@ export function outro(message) {
  * @param {string} key - Translation key for cancellation message
  */
 export function cancel(key) {
-  if (silentModeEnabled) {
+  if (shouldSuppress('cancel')) {
     process.exit(0);
   }
   p.cancel(t(key));
@@ -58,7 +86,7 @@ export function cancel(key) {
  * @param {string} text - Pre-formatted text (can include colors)
  */
 export function message(text) {
-  if (silentModeEnabled) {
+  if (shouldSuppress('message')) {
     return;
   }
   p.log.message(text);
@@ -70,7 +98,7 @@ export function message(text) {
  * @param {Record<string, any>} [vars] - Variables for interpolation
  */
 export function info(key, vars) {
-  if (silentModeEnabled) {
+  if (shouldSuppress('info')) {
     return;
   }
   p.log.info(t(key, vars));
@@ -82,7 +110,7 @@ export function info(key, vars) {
  * @param {Record<string, any>} [vars] - Variables for interpolation
  */
 export function success(key, vars) {
-  if (silentModeEnabled) {
+  if (shouldSuppress('success')) {
     return;
   }
   p.log.success(t(key, vars));
@@ -94,9 +122,6 @@ export function success(key, vars) {
  * @param {Record<string, any>} [vars] - Variables for interpolation
  */
 export function error(key, vars) {
-  if (silentModeEnabled) {
-    return;
-  }
   p.log.error(t(key, vars));
 }
 
@@ -106,9 +131,6 @@ export function error(key, vars) {
  * @param {Record<string, any>} [vars] - Variables for interpolation
  */
 export function warn(key, vars) {
-  if (silentModeEnabled) {
-    return;
-  }
   p.log.warn(t(key, vars));
 }
 
@@ -119,7 +141,7 @@ export function warn(key, vars) {
  * @param {Record<string, any>} [vars] - Variables for interpolation (applied to all)
  */
 export function note(lineKeys, titleKey, vars = {}) {
-  if (silentModeEnabled) {
+  if (shouldSuppress('note')) {
     return;
   }
   const content = lineKeys.map(key => t(key, vars)).join('\n');
@@ -134,7 +156,7 @@ export function note(lineKeys, titleKey, vars = {}) {
  * @returns {Object} Spinner object with message(key, vars) and stop(key, vars) methods
  */
 export function spinner(key, vars) {
-  if (silentModeEnabled) {
+  if (shouldSuppress('spinner')) {
     return {
       message: () => {},
       stop: () => {}
