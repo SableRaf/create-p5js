@@ -267,6 +267,20 @@ export function validateP5Mode(mode) {
 }
 
 /**
+ * Validates setup type selections
+ *
+ * @param {string} type - Setup type to validate
+ * @returns {string|null} Error message if invalid, null otherwise
+ */
+export function validateSetupType(type) {
+  const validTypes = ['basic', 'standard', 'custom'];
+  if (!validTypes.includes(type)) {
+    return `Invalid setup type: ${type}. Must be one of: ${validTypes.join(', ')}`;
+  }
+  return null;
+}
+
+/**
  * Determines template directory name from language and mode
  * @param {string} language - 'javascript' or 'typescript'
  * @param {string} mode - 'global' or 'instance'

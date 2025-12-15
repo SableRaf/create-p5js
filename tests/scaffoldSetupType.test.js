@@ -11,10 +11,13 @@ describe('setupType enum logic', () => {
     // Simulating the logic from scaffold.js line 57-70
     const args = { yes: true };
     let setupType = 'standard';
-    const hasConfigFlags = args.language || args['p5-mode'] || args.version || args.mode || args.template;
+    const hasConfigFlags = args.language || args['p5-mode'] || args.version || args.mode;
 
-    // If --yes flag, setupType remains 'standard'
-    if (hasConfigFlags) {
+    if (args.type) {
+      setupType = args.type;
+    } else if (!args.yes && !hasConfigFlags) {
+      setupType = 'basic'; // Example interactive selection
+    } else if (hasConfigFlags) {
       setupType = 'custom';
     }
 
@@ -25,9 +28,13 @@ describe('setupType enum logic', () => {
     // Simulating the logic with config flags
     const args = { language: 'typescript', 'p5-mode': 'instance' };
     let setupType = 'standard';
-    const hasConfigFlags = args.language || args['p5-mode'] || args.version || args.mode || args.template;
+    const hasConfigFlags = args.language || args['p5-mode'] || args.version || args.mode;
 
-    if (hasConfigFlags) {
+    if (args.type) {
+      setupType = args.type;
+    } else if (!args.yes && !hasConfigFlags) {
+      setupType = 'basic';
+    } else if (hasConfigFlags) {
       setupType = 'custom';
     }
 
@@ -38,16 +45,33 @@ describe('setupType enum logic', () => {
   it('should remain standard with no flags and yes=true', () => {
     const args = { yes: true };
     let setupType = 'standard';
-    const hasConfigFlags = args.language || args['p5-mode'] || args.version || args.mode || args.template;
+    const hasConfigFlags = args.language || args['p5-mode'] || args.version || args.mode;
 
-    if (!args.yes && !hasConfigFlags) {
-      // Would prompt in real scenario
+    if (args.type) {
+      setupType = args.type;
+    } else if (!args.yes && !hasConfigFlags) {
       setupType = 'basic'; // User could choose basic
     } else if (hasConfigFlags) {
       setupType = 'custom';
     }
 
     expect(setupType).toBe('standard');
+  });
+
+  it('should respect --type flag even when --yes is provided', () => {
+    const args = { yes: true, type: 'basic' };
+    let setupType = 'standard';
+    const hasConfigFlags = args.language || args['p5-mode'] || args.version || args.mode;
+
+    if (args.type) {
+      setupType = args.type;
+    } else if (!args.yes && !hasConfigFlags) {
+      setupType = 'basic';
+    } else if (hasConfigFlags) {
+      setupType = 'custom';
+    }
+
+    expect(setupType).toBe('basic');
   });
 });
 

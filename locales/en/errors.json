@@ -18,6 +18,7 @@
   "error.fetchTemplate": "Failed to fetch remote template \"{template}\": {error}",
   "error.templateMustBeRemote": "The --template flag now only accepts community templates (GitHub repos like 'user/repo'). Built-in templates have been replaced by --language and --p5-mode flags.",
   "error.cleanup": "Cleaning up...",
+  "error.invalidSetupType": "Invalid setup type specified.",
 
   "error.persistHelp.title": "If the problem persists:",
   "error.persistHelp.verbose": "• Try with --verbose flag for detailed output",
