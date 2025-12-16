@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "tsc: watch",
+      "label": "tsc: type-check",
       "type": "shell",
       "command": "npm run type-check",
       "group": {
