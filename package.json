@@ -29,7 +29,8 @@
   "scripts": {
     "test": "vitest run",
     "test:coverage": "vitest --coverage --run",
-    "run": "node ./index.js"
+    "run": "node ./index.js",
+    "type-check": "tsc"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
@@ -40,7 +41,11 @@
     "unique-names-generator": "^4.7.1"
   },
   "devDependencies": {
+    "@types/degit": "^2.8.6",
+    "@types/minimist": "^1.2.5",
+    "@types/node": "^25.0.2",
     "@vitest/coverage-v8": "^1.0.0",
+    "typescript": "^5.9.3",
     "vitest": "^1.0.0"
   }
 }
