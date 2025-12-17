@@ -4,7 +4,7 @@
     "checkJs": false // Enable type checking for JavaScript files
   },
   "include": [
-    "*.js",
+    "**/*.js",
     "types/*.d.ts"
   ]
 }
