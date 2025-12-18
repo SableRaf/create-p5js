@@ -398,3 +398,41 @@ export function isValidPathName(pathName) {
 
   return null; // Valid
 }
+
+
+/**
+ * Returns the absolute path to the project folder
+ * @param {string} cwdPath - absolute path of current working directory
+ * @param {"." | string} projectPath - may be absolute or relative
+ * @returns {string} fullTargetPath - absolute path for the project folder
+ */
+export function determineTargetPath(cwdPath, projectPath){
+  if (projectPath==="."){
+    return cwdPath;
+  }
+  
+  // We'll pick path.win32 or path.posix explicitly when we're in unit testing
+  // so we can test both sorts of paths on different OSes.
+  //Otherwise, running unit tests on mac or *nix won't think the windows style 
+  // c:\home\foo refers to an absolute path.    
+  const isTest = process.env.NODE_ENV === 'test';
+  const platformPath = !isTest ? path : getOSPlatformPathModuleBasedOnExamples([cwdPath, projectPath])
+
+  if(platformPath.isAbsolute(projectPath)){
+    return projectPath;  
+  }
+  
+  //project path must be relative.  resolve it absolutely.
+  return platformPath.join(cwdPath, projectPath);
+}
+
+/** Return path.win32 or path.posix by guessing based on the given array of example path strings. 
+ * This is a guess but is only for use when unit testing.
+ * @param {string[]} examplePaths
+ * @returns {path.PlatformPath}
+ */
+function getOSPlatformPathModuleBasedOnExamples(examplePaths){
+ return examplePaths.some(p => p.includes('\\') || p.includes(':'))
+    ? path.win32 
+    : path.posix;
+}
