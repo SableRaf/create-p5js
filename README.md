@@ -150,9 +150,6 @@ npm create p5js my-project -- --template user/repo/path/to/template
 
 # GitHub tree URL with branch and subfolder
 npm create p5js my-project -- --template "https://github.com/user/repo/tree/main/path/to/template"
-
-# Single-file template (creates a project that contains only this file)
-npm create p5js my-project -- --template "https://github.com/user/repo/blob/main/template.html"
 ```
 
 Note: Single-file templates will download the specified file into your new project directory — they do not create additional scaffold files. For full project scaffolding prefer a repository or subfolder template.
