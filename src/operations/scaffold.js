@@ -41,8 +41,8 @@ export async function scaffold(args) {
   if (firstArg && firstArg !== 'update') {
     // User provided a path as first argument
     projectPath = firstArg;
-  } else if (args.yes) {
-    // --yes flag: use random project name
+  } else if (args.yes || args.template) {
+    // --yes or --template flag: use random project name
     projectPath = generateProjectName();
   } else {
     // Interactive mode: prompt for path
@@ -57,7 +57,10 @@ export async function scaffold(args) {
   let setupType = 'standard';
   const hasConfigFlags = args.language || args['p5-mode'] || args.version || args.mode;
 
-  if (args.type) {
+  if (args.template) {
+    // When using --template, skip setup type - it will be handled in the template section
+    setupType = null;
+  } else if (args.type) {
     const typeError = validateSetupType(args.type);
     if (typeError) {
       display.error('error.invalidSetupType');
@@ -123,62 +126,50 @@ export async function scaffold(args) {
   }
 
   try {
-    // Fetch available p5.js versions
+    // Fetch available p5.js versions (skip for community templates)
     let latest, versions;
-    if (args.verbose) {
-      const s = display.spinner('spinner.fetchingVersions');
-      try {
-        ({ latest, versions } = await fetchVersions(args['include-prerelease']));
-        s.stop('spinner.fetchedVersions');
-        if (args['include-prerelease']) {
-          display.info('info.includePrerelease');
+    if (!args.template) {
+      if (args.verbose) {
+        const s = display.spinner('spinner.fetchingVersions');
+        try {
+          ({ latest, versions } = await fetchVersions(args['include-prerelease']));
+          s.stop('spinner.fetchedVersions');
+          if (args['include-prerelease']) {
+            display.info('info.includePrerelease');
+          }
+        } catch (error) {
+          s.stop('spinner.failedVersions');
+          display.message('');
+          display.error('error.fetchVersions.failed');
+          display.message(error.message);
+          display.message('');
+          display.info('error.fetchVersions.troubleshooting');
+          display.info('error.fetchVersions.step1');
+          display.info('error.fetchVersions.step2');
+          display.info('error.fetchVersions.step3');
+          process.exit(1);
         }
-      } catch (error) {
-        s.stop('spinner.failedVersions');
-        display.message('');
-        display.error('error.fetchVersions.failed');
-        display.message(error.message);
-        display.message('');
-        display.info('error.fetchVersions.troubleshooting');
-        display.info('error.fetchVersions.step1');
-        display.info('error.fetchVersions.step2');
-        display.info('error.fetchVersions.step3');
-        process.exit(1);
-      }
-    } else {
-      try {
-        ({ latest, versions } = await fetchVersions(args['include-prerelease']));
-        if (args['include-prerelease']) {
-          display.info('info.includePrerelease');
+      } else {
+        try {
+          ({ latest, versions } = await fetchVersions(args['include-prerelease']));
+          if (args['include-prerelease']) {
+            display.info('info.includePrerelease');
+          }
+        } catch (error) {
+          display.message('');
+          display.error('error.fetchVersions.failed');
+          display.message(error.message);
+          display.message('');
+          display.info('error.fetchVersions.troubleshooting');
+          display.info('error.fetchVersions.step1');
+          display.info('error.fetchVersions.step2');
+          display.info('error.fetchVersions.step3');
+          process.exit(1);
         }
-      } catch (error) {
-        display.message('');
-        display.error('error.fetchVersions.failed');
-        display.message(error.message);
-        display.message('');
-        display.info('error.fetchVersions.troubleshooting');
-        display.info('error.fetchVersions.step1');
-        display.info('error.fetchVersions.step2');
-        display.info('error.fetchVersions.step3');
-        process.exit(1);
       }
     }
 
-    // Validate all flags immediately after fetching versions (before any prompts)
-    if (args.language) {
-      const langError = validateLanguage(args.language);
-      if (langError) {
-        throw new Error(langError);
-      }
-    }
-
-    if (args['p5-mode']) {
-      const p5ModeError = validateP5Mode(args['p5-mode']);
-      if (p5ModeError) {
-        throw new Error(p5ModeError);
-      }
-    }
-
+    // Validate template flag first
     if (args.template) {
       // --template flag now ONLY for community templates
       if (!isRemoteTemplateSpec(args.template)) {
@@ -186,17 +177,34 @@ export async function scaffold(args) {
       }
     }
 
-    if (args.version) {
-      const versionError = validateVersion(args.version, versions, latest);
-      if (versionError) {
-        throw new Error(versionError);
+    // Validate all other flags (skip if using --template, as they don't apply)
+    if (!args.template) {
+      if (args.language) {
+        const langError = validateLanguage(args.language);
+        if (langError) {
+          throw new Error(langError);
+        }
       }
-    }
 
-    if (args.mode) {
-      const modeError = validateMode(args.mode);
-      if (modeError) {
-        throw new Error(modeError);
+      if (args['p5-mode']) {
+        const p5ModeError = validateP5Mode(args['p5-mode']);
+        if (p5ModeError) {
+          throw new Error(p5ModeError);
+        }
+      }
+
+      if (args.version) {
+        const versionError = validateVersion(args.version, versions, latest);
+        if (versionError) {
+          throw new Error(versionError);
+        }
+      }
+
+      if (args.mode) {
+        const modeError = validateMode(args.mode);
+        if (modeError) {
+          throw new Error(modeError);
+        }
       }
     }
 
@@ -204,7 +212,7 @@ export async function scaffold(args) {
     if (args.template) {
       // Community template - fetch from remote and exit early
       // We don't modify community templates - just clone them
-      const copySpinner = args.verbose ? display.spinner('spinner.fetchingRemoteTemplate') : null;
+      const copySpinner = display.spinner('spinner.fetchingRemoteTemplate');
       if (args.verbose) {
         const spec = normalizeTemplateSpec(args.template);
         display.info('note.verbose.remoteTemplateSpec', { spec });
@@ -212,9 +220,9 @@ export async function scaffold(args) {
       }
       try {
         await fetchTemplate(args.template, targetPath, { verbose: args.verbose });
-        if (copySpinner) copySpinner.stop('spinner.fetchedRemoteTemplate');
+        copySpinner.stop('spinner.fetchedRemoteTemplate');
       } catch (err) {
-        if (copySpinner) copySpinner.stop('spinner.failedRemoteTemplate');
+        copySpinner.stop('spinner.failedRemoteTemplate');
         throw new Error(t('error.fetchTemplate', { template: args.template, error: err.message }));
       }
 
