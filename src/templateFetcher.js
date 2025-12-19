@@ -1,4 +1,5 @@
 import degit from 'degit';
+import { parseGitHubSpec, isSingleFile, downloadSingleFile, downloadGitHubArchive } from './githubFallback.js';
 
 /**
  * Detect whether the provided template spec refers to a remote template
@@ -129,12 +130,43 @@ export function normalizeTemplateSpec(t) {
  * - gitlab:user/repo
  * - bitbucket:user/repo
  *
+ * Falls back to direct GitHub archive download if degit fails.
+ * Supports single-file templates via blob URLs.
+ *
  * @param {string} templateSpec
  * @param {string} targetPath
  * @param {{verbose?:boolean}} [options]
  */
 export async function fetchTemplate(templateSpec, targetPath, options = {}) {
   const spec = normalizeTemplateSpec(templateSpec);
-  const emitter = degit(spec, { cache: false, force: true, verbose: !!options.verbose });
-  await emitter.clone(targetPath);
+
+  // Try degit first
+  try {
+    const emitter = degit(spec, { cache: false, force: true, verbose: !!options.verbose });
+    await emitter.clone(targetPath);
+    return;
+  } catch (degitError) {
+    // If degit fails, try fallback for GitHub repos
+    const parsed = parseGitHubSpec(spec);
+
+    if (!parsed) {
+      // Can't parse as GitHub spec, re-throw original error
+      throw degitError;
+    }
+
+    const { user, repo, ref, subpath } = parsed;
+
+    try {
+      // Check if this is a single file
+      if (isSingleFile(subpath)) {
+        await downloadSingleFile(user, repo, ref, subpath, targetPath);
+      } else {
+        // Download directory via archive
+        await downloadGitHubArchive(user, repo, ref, subpath, targetPath);
+      }
+    } catch (fallbackError) {
+      // If fallback also fails, throw the original degit error for better context
+      throw new Error(`${degitError.message} (fallback also failed: ${fallbackError.message})`);
+    }
+  }
 }
