@@ -16,7 +16,7 @@ import * as display from '../ui/display.js';
 import * as prompts from '../ui/prompts.js';
 
 // Business utilities
-import { copyTemplateFiles, validateProjectName, directoryExists, validateMode, validateVersion, validateLanguage, validateP5Mode, validateSetupType, getTemplateName, generateProjectName, isRemoteTemplateSpec } from '../utils.js';
+import { copyTemplateFiles, determineTargetPath, validateProjectName, directoryExists, validateMode, validateVersion, validateLanguage, validateP5Mode, validateSetupType, getTemplateName, generateProjectName, isRemoteTemplateSpec } from '../utils.js';
 import { fetchVersions, downloadP5Files, downloadTypeDefinitions } from '../version.js';
 import { injectP5Script } from '../htmlManager.js';
 import { createConfig } from '../config.js';
@@ -85,7 +85,7 @@ export async function scaffold(args) {
 
   // Extract project name from path for display purposes
   const projectName = projectPath === '.' ? path.basename(process.cwd()) : path.basename(projectPath);
-
+  
   // Validate project name
   const nameError = validateProjectName(projectName);
   if (nameError) {
@@ -94,8 +94,7 @@ export async function scaffold(args) {
     process.exit(1);
   }
 
-  // Determine target path
-  const targetPath = projectPath === '.' ? process.cwd() : path.join(process.cwd(), projectPath);
+  const targetPath = determineTargetPath(process.cwd(), projectPath);
 
   // Check if target directory already exists (unless it's current directory and empty)
   if (projectPath !== '.') {

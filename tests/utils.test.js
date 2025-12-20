@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  determineTargetPath,
   validateProjectName,
   validateProjectPath,
   isRemoteTemplateSpec,
@@ -78,6 +79,34 @@ describe('utils validations', () => {
     expect(validateVersion('2.0.0', available, '1.9.0')).toMatch(/not found/);
   });
 });
+
+
+describe(determineTargetPath.name, () => {
+  it ("returns an absolute path unchanged if given one on *nix", () => {
+      expect(determineTargetPath("/Users/mrtest/iworkhere", "/Users/mrtest/elsewhere/aaa")).toBe("/Users/mrtest/elsewhere/aaa");
+      expect(determineTargetPath("/Users/mrtest/iworkhere", "/tmp/quickproject")).toBe("/tmp/quickproject");
+  });
+  
+  it ("returns absolute path incorporating cwd if given a relative path on *nix", () => {
+      expect(determineTargetPath("/Users/mrtest/stuff", "aaa/bbb")).toBe("/Users/mrtest/stuff/aaa/bbb");
+      expect(determineTargetPath("/Users/mrtest/stuff", "ccc")).toBe("/Users/mrtest/stuff/ccc");
+
+  });
+
+  it ("returns absolute path to cwd when given '.' for project path on *nix", () => {
+      expect(determineTargetPath("/Users/mrtest/iworkhere", ".")).toBe("/Users/mrtest/iworkhere");
+  });
+
+  it("handles Windows drive letters and separators", () => {
+      // Absolute paths with drive letters
+      expect(determineTargetPath("C:\\Users\\test", "D:\\Project")).toBe("D:\\Project");
+      
+      // Relative paths on Windows
+      expect(determineTargetPath("C:\\Users\\test", "subdir1\\subdir2")).toBe("C:\\Users\\test\\subdir1\\subdir2");
+      expect(determineTargetPath("C:\\Users\\test", "subdir")).toBe("C:\\Users\\test\\subdir");
+  });
+
+})
 
 describe('path name validation functions', () => {
   describe('hasValidCharacters', () => {
