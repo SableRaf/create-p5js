@@ -140,15 +140,22 @@ export function normalizeTemplateSpec(t) {
 export async function fetchTemplate(templateSpec, targetPath, options = {}) {
   const spec = normalizeTemplateSpec(templateSpec);
 
-  // Try degit first
+  // Check if this is a GitHub single file before trying degit
+  // (degit creates files instead of directories for single files)
+  const parsed = parseGitHubSpec(spec);
+  if (parsed && isSingleFile(parsed.subpath)) {
+    const { user, repo, ref, subpath } = parsed;
+    await downloadSingleFile(user, repo, ref, subpath, targetPath);
+    return;
+  }
+
+  // Try degit first for directories, repos, and non-GitHub hosts
   try {
     const emitter = degit(spec, { cache: false, force: true, verbose: !!options.verbose });
     await emitter.clone(targetPath);
     return;
   } catch (degitError) {
     // If degit fails, try fallback for GitHub repos
-    const parsed = parseGitHubSpec(spec);
-
     if (!parsed) {
       // Can't parse as GitHub spec, re-throw original error
       throw degitError;
@@ -157,13 +164,8 @@ export async function fetchTemplate(templateSpec, targetPath, options = {}) {
     const { user, repo, ref, subpath } = parsed;
 
     try {
-      // Check if this is a single file
-      if (isSingleFile(subpath)) {
-        await downloadSingleFile(user, repo, ref, subpath, targetPath);
-      } else {
-        // Download directory via archive
-        await downloadGitHubArchive(user, repo, ref, subpath, targetPath);
-      }
+      // Download directory via archive
+      await downloadGitHubArchive(user, repo, ref, subpath, targetPath);
     } catch (fallbackError) {
       // If fallback also fails, throw the original degit error for better context
       throw new Error(`${degitError.message} (fallback also failed: ${fallbackError.message})`);
