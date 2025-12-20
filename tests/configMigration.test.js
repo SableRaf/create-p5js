@@ -79,7 +79,7 @@ describe('Config file migration', () => {
     expect(newContentResult.version).toBe('2.0.0');
   });
 
-  it('handles permission errors gracefully', async () => {
+  it.skipIf(process.platform === 'win32')('handles permission errors gracefully', async () => {
     // Setup: create old config file
     await fs.writeFile(oldConfigPath, JSON.stringify(testConfig, null, 2));
 
