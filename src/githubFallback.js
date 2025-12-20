@@ -28,14 +28,42 @@ export function parseGitHubSpec(spec) {
 }
 
 /**
- * Check if a path points to a single file (has file extension)
+  * Known file extensions that should be treated as single files when downloading from GitHub.
+ * This helps avoid misclassifying directories with dots in their names (e.g. "v1.0") as files.
+ * @type {Set<string>}
+ */
+const KNOWN_SINGLE_FILE_EXTENSIONS = new Set([
+  '.js',
+  '.ts',
+  '.mjs',
+  '.cjs',
+  '.json',
+  '.html',
+  '.htm',
+  '.css',
+  '.glsl',
+  '.vert',
+  '.frag',
+  '.md',
+  '.markdown',
+  '.mdx',
+  '.txt',
+  '.zip',
+  '.tar',
+  '.tgz',
+  '.gz'
+]);
+/**
+ * Check if a path points to a single file (has a known file extension)
  * @param {string} subpath
  * @returns {boolean}
  */
 export function isSingleFile(subpath) {
   if (!subpath) return false;
-  const basename = subpath.split('/').pop();
-  return basename.includes('.');
+  const basename = subpath.split('/').pop() || '';
+  const ext = path.extname(basename).toLowerCase();
+  if (!ext) return false;
+  return KNOWN_SINGLE_FILE_EXTENSIONS.has(ext);
 }
 
 /**
