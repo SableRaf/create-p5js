@@ -91,7 +91,7 @@ export async function scaffold(args) {
     process.exit(1);
   }
 
-  const targetPath = determineTargetPath(process.cwd(), projectPath)
+  const targetPath = determineTargetPath(process.cwd(), projectPath);
 
   // Check if target directory already exists (unless it's current directory and empty)
   if (projectPath !== '.') {
