@@ -41,7 +41,7 @@ describe('--template flag: project path logic', () => {
     expect(projectPath).toBe('my-project');
   });
 
-  it('should auto-generate when --yes is used (existing behavior)', () => {
+  it('should auto-generate when --yes is used', () => {
     const args = { yes: true };
     const firstArg = undefined;
     let projectPath;
@@ -120,26 +120,14 @@ describe('--template flag: version fetching logic', () => {
   it('should skip version fetching when --template is used', () => {
     // Simulating the logic from scaffold.js line 128-170
     const args = { template: 'user/repo' };
-    let shouldFetchVersions = true;
-
-    if (!args.template) {
-      shouldFetchVersions = true;
-    } else {
-      shouldFetchVersions = false;
-    }
+    const shouldFetchVersions = !args.template;
 
     expect(shouldFetchVersions).toBe(false);
   });
 
   it('should fetch versions when --template is not used', () => {
     const args = { yes: true };
-    let shouldFetchVersions = true;
-
-    if (!args.template) {
-      shouldFetchVersions = true;
-    } else {
-      shouldFetchVersions = false;
-    }
+    const shouldFetchVersions = !args.template;
 
     expect(shouldFetchVersions).toBe(true);
   });
@@ -238,7 +226,7 @@ describe('--template flag: combined scenarios', () => {
     const firstArg = undefined;
     let projectPath;
     let setupType = 'standard';
-    let shouldFetchVersions = true;
+    const shouldFetchVersions = !args.template;
 
     // Project path logic
     if (firstArg && firstArg !== 'update') {
@@ -250,13 +238,6 @@ describe('--template flag: combined scenarios', () => {
     // Setup type logic
     if (args.template) {
       setupType = null;
-    }
-
-    // Version fetching logic
-    if (!args.template) {
-      shouldFetchVersions = true;
-    } else {
-      shouldFetchVersions = false;
     }
 
     expect(projectPath).toBe('generated-name');
@@ -269,7 +250,7 @@ describe('--template flag: combined scenarios', () => {
     const firstArg = 'my-custom-project';
     let projectPath;
     let setupType = 'standard';
-    let shouldFetchVersions = true;
+    const shouldFetchVersions = !args.template;
 
     // Project path logic
     if (firstArg && firstArg !== 'update') {
@@ -281,13 +262,6 @@ describe('--template flag: combined scenarios', () => {
     // Setup type logic
     if (args.template) {
       setupType = null;
-    }
-
-    // Version fetching logic
-    if (!args.template) {
-      shouldFetchVersions = true;
-    } else {
-      shouldFetchVersions = false;
     }
 
     expect(projectPath).toBe('my-custom-project');
@@ -307,18 +281,11 @@ describe('--template flag: combined scenarios', () => {
 
     let validationCount = 0;
     let setupType = 'standard';
-    let shouldFetchVersions = true;
+    const shouldFetchVersions = !args.template;
 
     // Setup type logic
     if (args.template) {
       setupType = null;
-    }
-
-    // Version fetching logic
-    if (!args.template) {
-      shouldFetchVersions = true;
-    } else {
-      shouldFetchVersions = false;
     }
 
     // Validation logic
