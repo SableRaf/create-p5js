@@ -150,9 +150,16 @@ npm create p5js my-project -- --template user/repo/path/to/template
 
 # GitHub tree URL with branch and subfolder
 npm create p5js my-project -- --template "https://github.com/user/repo/tree/main/path/to/template"
+
+# Single file inside a repository (downloads just that file)
+npm create p5js my-project -- --template user/repo/path/to/file.js
 ```
 
 Note: Single-file templates will download the specified file into your new project directory — they do not create additional scaffold files. For full project scaffolding prefer a repository or subfolder template.
+
+The tool support the full range of degit syntax for specifying branches, tags, and commit hashes. See the [degit documentation](https://github.com/Rich-Harris/degit).
+
+We also added support for Codeberg repositories using the same syntax.
 
 ## Troubleshooting
 

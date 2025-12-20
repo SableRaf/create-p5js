@@ -62,6 +62,26 @@ describe('parseCodebergSpec', () => {
     });
   });
 
+  it('parses codeberg:user/repo/src/branch/ref/file', () => {
+    const result = parseCodebergSpec('codeberg:user/repo/src/branch/main/README.md');
+    expect(result).toEqual({
+      user: 'user',
+      repo: 'repo',
+      ref: 'main',
+      subpath: 'README.md'
+    });
+  });
+
+  it('parses codeberg:user/repo/src/branch/ref/path/to/file', () => {
+    const result = parseCodebergSpec('codeberg:user/repo/src/branch/develop/examples/basic.js');
+    expect(result).toEqual({
+      user: 'user',
+      repo: 'repo',
+      ref: 'develop',
+      subpath: 'examples/basic.js'
+    });
+  });
+
   it('parses git@codeberg.org:user/repo SSH format', () => {
     const result = parseCodebergSpec('git@codeberg.org:user/repo');
     expect(result).toEqual({
@@ -99,6 +119,26 @@ describe('parseCodebergSpec', () => {
       repo: 'repo',
       ref: 'main',
       subpath: ''
+    });
+  });
+
+  it('parses git@codeberg.org:user/repo/src/branch/ref/file', () => {
+    const result = parseCodebergSpec('git@codeberg.org:user/repo/src/branch/main/index.html');
+    expect(result).toEqual({
+      user: 'user',
+      repo: 'repo',
+      ref: 'main',
+      subpath: 'index.html'
+    });
+  });
+
+  it('parses git@codeberg.org:user/repo/src/branch/ref/path/to/file', () => {
+    const result = parseCodebergSpec('git@codeberg.org:user/repo/src/branch/v1.0/src/app.js');
+    expect(result).toEqual({
+      user: 'user',
+      repo: 'repo',
+      ref: 'v1.0',
+      subpath: 'src/app.js'
     });
   });
 

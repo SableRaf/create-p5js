@@ -30,8 +30,23 @@ export function parseCodebergSpec(spec) {
 
     const user = parts[0];
     const repo = parts[1].replace(/\.git$/, '');
-    const subpath = parts.slice(2).join('/');
-    const ref = hashRef || 'main';
+
+    let ref = 'main';
+    let subpath = '';
+
+    // Check for src/branch/ref/path pattern (similar to Codeberg web URLs)
+    if (parts[2] === 'src' && parts[3] === 'branch' && parts[4]) {
+      ref = parts[4];
+      subpath = parts.slice(5).join('/');
+    } else {
+      // Everything after repo is subpath
+      subpath = parts.slice(2).join('/');
+    }
+
+    // Hash ref overrides path-based ref
+    if (hashRef) {
+      ref = hashRef;
+    }
 
     return { user, repo, ref, subpath };
   }
@@ -46,8 +61,23 @@ export function parseCodebergSpec(spec) {
 
     const user = parts[0];
     const repo = parts[1].replace(/\.git$/, '');
-    const subpath = parts.slice(2).join('/');
-    const ref = hashRef || 'main';
+
+    let ref = 'main';
+    let subpath = '';
+
+    // Check for src/branch/ref/path pattern (similar to Codeberg web URLs)
+    if (parts[2] === 'src' && parts[3] === 'branch' && parts[4]) {
+      ref = parts[4];
+      subpath = parts.slice(5).join('/');
+    } else {
+      // Everything after repo is subpath
+      subpath = parts.slice(2).join('/');
+    }
+
+    // Hash ref overrides path-based ref
+    if (hashRef) {
+      ref = hashRef;
+    }
 
     return { user, repo, ref, subpath };
   }

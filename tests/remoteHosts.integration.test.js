@@ -131,6 +131,40 @@ describe('Remote hosts integration tests', () => {
         .catch(() => false);
       expect(readmeExists).toBe(true);
     }, 30000);
+
+    it('should fetch single file using codeberg:user/repo/src/branch/ref/file', async () => {
+      const targetPath = path.join(testDir, 'codeberg-single-shorthand');
+
+      // Use shorthand with src/branch/ref pattern
+      await fetchTemplate('codeberg:blazp/p5js_template/src/branch/main/README.md', targetPath);
+
+      // Verify the directory was created
+      const stats = await fs.stat(targetPath);
+      expect(stats.isDirectory()).toBe(true);
+
+      // Verify the file exists
+      const fileExists = await fs.access(path.join(targetPath, 'README.md'))
+        .then(() => true)
+        .catch(() => false);
+      expect(fileExists).toBe(true);
+    }, 30000);
+
+    it('should fetch single file using git@codeberg.org:user/repo/src/branch/ref/file', async () => {
+      const targetPath = path.join(testDir, 'codeberg-single-ssh');
+
+      // Use SSH-style syntax with src/branch/ref pattern
+      await fetchTemplate('git@codeberg.org:blazp/p5js_template/src/branch/main/README.md', targetPath);
+
+      // Verify the directory was created
+      const stats = await fs.stat(targetPath);
+      expect(stats.isDirectory()).toBe(true);
+
+      // Verify the file exists
+      const fileExists = await fs.access(path.join(targetPath, 'README.md'))
+        .then(() => true)
+        .catch(() => false);
+      expect(fileExists).toBe(true);
+    }, 30000);
   });
 
   describe('Unsupported hosts error handling', () => {
