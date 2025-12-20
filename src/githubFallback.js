@@ -157,14 +157,17 @@ export async function downloadGitHubArchive(user, repo, ref, subpath, targetPath
             response.statusCode === 307 || response.statusCode === 308) {
           const location = response.headers.location;
           if (!location) {
+            response.resume();
             reject(new Error(`Redirect without Location header: HTTP ${response.statusCode}`));
             return;
           }
+          response.resume();
           downloadWithRedirects(location, redirectCount + 1);
           return;
         }
 
         if (response.statusCode !== 200) {
+          response.resume();
           reject(new Error(`Failed to download archive: HTTP ${response.statusCode}`));
           return;
         }
