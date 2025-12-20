@@ -112,12 +112,15 @@ export async function downloadGitHubArchive(user, repo, ref, subpath, targetPath
         }
       });
 
-      response
-        .pipe(createGunzip())
-        .pipe(extractor)
-        .on('finish', resolve)
-        .on('error', reject);
+      const gunzip = createGunzip();
 
+      // Ensure errors from all streams in the pipeline reject the promise
+      response.on('error', reject);
+      gunzip.on('error', reject);
+      extractor.on('error', reject);
+      extractor.on('finish', resolve);
+
+      response.pipe(gunzip).pipe(extractor);
     }).on('error', reject);
   });
 }
