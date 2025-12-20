@@ -29,7 +29,9 @@
   "scripts": {
     "test": "vitest run",
     "test:coverage": "vitest --coverage --run",
-    "run": "node ./index.js"
+    "run": "node ./index.js",
+    "pre-publish": "npm pack --dry-run && npm test && node scripts/check-npm-login.js"
+
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
