@@ -104,7 +104,7 @@ export function normalizeTemplateSpec(t) {
     const bp = base.split('/').filter(Boolean);
     if (bp.length >= 2) {
       bp[1] = bp[1].replace(/\.git$/, '');
-      return `${bp.join('/') }#${hash}`;
+      return `${bp.join('/')}#${hash}`;
     }
   }
 
