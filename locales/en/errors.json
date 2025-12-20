@@ -16,6 +16,7 @@
   "error.fetchVersions.step3": "  3. Try again in a few moments",
 
   "error.fetchTemplate": "Failed to fetch remote template \"{template}\": {error}",
+  "error.fetchTemplate.failed": "Failed to fetch remote template",
   "error.templateMustBeRemote": "The --template flag now only accepts community templates (GitHub repos like 'user/repo'). Built-in templates have been replaced by --language and --p5-mode flags.",
   "error.cleanup": "Cleaning up...",
   "error.invalidSetupType": "Invalid setup type specified.",

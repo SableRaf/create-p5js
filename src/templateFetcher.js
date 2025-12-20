@@ -1,5 +1,6 @@
 import degit from 'degit';
 import { parseGitHubSpec, isSingleFile, downloadSingleFile, downloadGitHubArchive } from './githubFallback.js';
+import { parseCodebergSpec, downloadCodebergArchive, downloadCodebergSingleFile } from './codebergFallback.js';
 
 /**
  * Detect whether the provided template spec refers to a remote template
@@ -36,7 +37,7 @@ export function isRemoteTemplateSpec(t) {
 export function normalizeTemplateSpec(t) {
   if (!t || typeof t !== 'string') return t;
 
-  // Handle full URLs first (GitHub tree/blob forms)
+  // Handle full URLs first (GitHub tree/blob forms and Codeberg src/branch forms)
   if (/^https?:\/\//.test(t)) {
     try {
       const u = new URL(t);
@@ -67,6 +68,27 @@ export function normalizeTemplateSpec(t) {
           }
 
           return `${user}/${repo}`;
+        }
+      } else if (u.hostname.includes('codeberg.org')) {
+        // Handle Codeberg URLs: https://codeberg.org/user/repo/src/branch/branchname/path
+        const parts = u.pathname.split('/').filter(Boolean);
+        if (parts.length >= 2) {
+          const user = parts[0];
+          let repo = parts[1].replace(/\.git$/, '');
+
+          // Handle /src/branch/<ref>/path/to/file
+          if (parts[2] === 'src' && parts[3] === 'branch' && parts[4]) {
+            const branch = parts[4];
+            const subpath = parts.slice(5).join('/');
+            // For Codeberg, we need to use the full URL format that degit can handle
+            // Return as codeberg:user/repo/subpath#ref format
+            let spec = `https://codeberg.org/${user}/${repo}`;
+            if (subpath) spec += `/${subpath}`;
+            spec += `#${branch}`;
+            return spec;
+          }
+
+          return `https://codeberg.org/${user}/${repo}`;
         }
       }
     } catch (e) {
@@ -140,9 +162,35 @@ export function normalizeTemplateSpec(t) {
 export async function fetchTemplate(templateSpec, targetPath, options = {}) {
   const spec = normalizeTemplateSpec(templateSpec);
 
+  // Check if this is a Codeberg URL
+  const isCodeberg = /^https?:\/\/codeberg\.org/.test(templateSpec);
+
   // Check if this is a GitHub single file before trying degit
   // (degit creates files instead of directories for single files)
-  const parsed = parseGitHubSpec(spec);
+  // Only apply this check for GitHub URLs to avoid mangling non-GitHub hosts
+  const isGitHub = /^https?:\/\/github\.com/.test(templateSpec) ||
+                    !/^https?:\/\//.test(templateSpec);
+
+  // Handle Codeberg URLs directly (degit doesn't support Codeberg)
+  if (isCodeberg) {
+    const codebergParsed = parseCodebergSpec(spec);
+    if (!codebergParsed) {
+      throw new Error('Invalid Codeberg URL format');
+    }
+
+    const { user, repo, ref, subpath } = codebergParsed;
+
+    // Check if it's a single file
+    if (isSingleFile(subpath)) {
+      await downloadCodebergSingleFile(user, repo, ref, subpath, targetPath);
+    } else {
+      await downloadCodebergArchive(user, repo, ref, subpath, targetPath);
+    }
+    return;
+  }
+
+  const parsed = isGitHub ? parseGitHubSpec(spec) : null;
+
   if (parsed && isSingleFile(parsed.subpath)) {
     const { user, repo, ref, subpath } = parsed;
     await downloadSingleFile(user, repo, ref, subpath, targetPath);
@@ -155,7 +203,7 @@ export async function fetchTemplate(templateSpec, targetPath, options = {}) {
     await emitter.clone(targetPath);
     return;
   } catch (degitError) {
-    // If degit fails, try fallback for GitHub repos
+    // If degit fails, try fallback for GitHub repos (only if we parsed it as GitHub)
     if (!parsed) {
       // Can't parse as GitHub spec, re-throw original error
       throw degitError;

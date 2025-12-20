@@ -487,7 +487,11 @@ export async function scaffold(args) {
     }
   } catch (error) {
     display.message('');
-    display.error('error.fetchVersions.failed');
+    // For template errors, the error.message already contains the full context
+    // For version fetch errors, show a specific header
+    if (!args.template) {
+      display.error('error.fetchVersions.failed');
+    }
     display.message(error.message);
 
     if (args.verbose) {
