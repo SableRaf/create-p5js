@@ -115,6 +115,7 @@ export async function downloadSingleFile(user, repo, ref, filepath, targetPath) 
         }
 
         const fileStream = createWriteStream(filePath);
+        response.on('error', reject);
         response.pipe(fileStream);
 
         fileStream.on('finish', () => {
