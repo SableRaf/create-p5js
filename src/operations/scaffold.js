@@ -255,18 +255,18 @@ export async function scaffold(args) {
     }
 
     // Built-in templates: determine delivery mode (flag, default, or prompt)
-    let selectedMode;
+    let selectedDeliveryMode;
     if (args.mode) {
-      selectedMode = args.mode;
-      display.success('info.usingMode', { mode: selectedMode });
+      selectedDeliveryMode = args.mode;
+      display.success('info.usingMode', { mode: selectedDeliveryMode });
     } else if (setupType === 'basic' || setupType === 'standard') {
       // Use default (cdn) for basic and standard setups
-      selectedMode = 'cdn';
+      selectedDeliveryMode = 'cdn';
       display.success('info.defaultMode');
     } else {
       // Interactive customization mode (custom)
-      selectedMode = await prompts.promptMode();
-      if (prompts.isCancel(selectedMode)) {
+      selectedDeliveryMode = await prompts.promptMode();
+      if (prompts.isCancel(selectedDeliveryMode)) {
         display.cancel('prompt.cancel.sketchCreation');
       }
     }
@@ -315,7 +315,7 @@ export async function scaffold(args) {
         language: selectedLanguage,
         p5Mode: selectedP5Mode,
         version: selectedVersion,
-        mode: selectedMode
+        mode: selectedDeliveryMode
       }));
       display.message('');
     }
@@ -353,7 +353,7 @@ export async function scaffold(args) {
     }
 
     // If local mode, create lib directory and download p5.js files
-    if (selectedMode === 'local') {
+    if (selectedDeliveryMode === 'local') {
       const libPath = path.join(targetPath, 'lib');
       await fs.mkdir(libPath, { recursive: true });
       try {
@@ -378,7 +378,7 @@ export async function scaffold(args) {
     // Inject p5.js script tag into index.html
     const indexPath = path.join(targetPath, 'index.html');
     const htmlContent = await fs.readFile(indexPath, 'utf-8');
-    const updatedHtml = injectP5Script(htmlContent, selectedVersion, selectedMode);
+    const updatedHtml = injectP5Script(htmlContent, selectedVersion, selectedDeliveryMode);
     await fs.writeFile(indexPath, updatedHtml, 'utf-8');
 
     // Download TypeScript definitions (skip for basic setup)
@@ -413,7 +413,7 @@ export async function scaffold(args) {
     const configPath = path.join(targetPath, '.p5-config.json');
     await createConfig(configPath, {
       version: selectedVersion,
-      mode: selectedMode,
+      mode: selectedDeliveryMode,
       language: selectedLanguage,
       p5Mode: selectedP5Mode,
       typeDefsVersion
@@ -444,7 +444,7 @@ export async function scaffold(args) {
       language: selectedLanguage,
       p5Mode: selectedP5Mode,
       version: selectedVersion,
-      mode: selectedMode,
+      mode: selectedDeliveryMode,
       types: typeDefsVersion
     });
 
@@ -479,7 +479,7 @@ export async function scaffold(args) {
 
     if (args.git) {
       const gitTipsLines = ['note.gitTips.firstCommit'];
-      if (selectedMode === 'local') {
+      if (selectedDeliveryMode === 'local') {
         gitTipsLines.push('note.gitTips.libIgnored');
       }
       display.note(gitTipsLines, 'note.gitTips.title');
