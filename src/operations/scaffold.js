@@ -34,7 +34,7 @@ const __dirname = path.dirname(__filename);
 export async function scaffold(args) {
   display.intro();
 
-  // Determine project path (command argument, flag, or prompt)
+  // STEP: Determine project path (command argument, flag, or prompt)
   let projectPath;
   const firstArg = args._[0];
 
@@ -53,7 +53,7 @@ export async function scaffold(args) {
     }
   }
 
-  // Determine setup type (allow override via --type flag)
+  // STEP: Determine setup type (allow override via --type flag)
   let setupType = 'standard';
   const hasConfigFlags = args.language || args['p5-mode'] || args.version || args.mode;
 
@@ -206,7 +206,8 @@ export async function scaffold(args) {
         }
       }
     }
-
+    
+    // STEP: Handle community templates  
     // Handle community templates early - they don't need version/mode selection
     if (args.template) {
       // Community template - fetch from remote and exit early
@@ -237,7 +238,7 @@ export async function scaffold(args) {
       display.outro(t('note.success.created'));
     }
 
-    // Built-in templates: determine version (flag, default, or prompt)
+    // STEP: Built-in templates: determine p5 version (flag, default, or prompt)
     let selectedVersion;
     if (args.version) {
       selectedVersion = args.version === 'latest' ? latest : args.version;
@@ -254,7 +255,7 @@ export async function scaffold(args) {
       }
     }
 
-    // Built-in templates: determine delivery mode (flag, default, or prompt)
+    // STEP: For built-in templates, determine delivery mode (flag, default, or prompt)
     let selectedMode;
     if (args.mode) {
       selectedMode = args.mode;
@@ -271,9 +272,8 @@ export async function scaffold(args) {
       }
     }
 
-    // Determine language and p5Mode for built-in templates
+    // STEP: Determine language and p5Mode for built-in templates
     let selectedLanguage, selectedP5Mode;
-
     if (args.language && args['p5-mode']) {
       // Non-interactive with flags
       selectedLanguage = args.language;
@@ -294,7 +294,7 @@ export async function scaffold(args) {
     }
 
 
-    // Show summary of choices if not using --yes flag
+    // STEP: Show summary of choices if not using --yes flag
     if (!args.yes && (args.language || args['p5-mode'] || args.version || args.mode || args.git || args.types === false)) {
       display.message('');
       const configLines = [
@@ -320,7 +320,7 @@ export async function scaffold(args) {
       display.message('');
     }
 
-    // Copy built-in template files
+    // STEP: Copy built-in template files
     let templateDir;
     if (setupType === 'basic') {
       // Basic setup always uses minimal template
@@ -341,7 +341,7 @@ export async function scaffold(args) {
       await copyTemplateFiles(templatePath, targetPath);
     }
 
-    // Initialize git repository if requested (do this before other file operations)
+    // STEP: Initialize git repository if requested (do this before other file operations)
     if (args.git) {
       if (args.verbose) {
         const gitSpinner = display.spinner('spinner.initializingGit');
@@ -352,7 +352,7 @@ export async function scaffold(args) {
       }
     }
 
-    // If local mode, create lib directory and download p5.js files
+    // STEP: If local mode, create lib directory and download p5.js files
     if (selectedMode === 'local'  && selectedLanguage !== 'typescript') {
       const libPath = path.join(targetPath, 'lib');
       await fs.mkdir(libPath, { recursive: true });
@@ -375,13 +375,13 @@ export async function scaffold(args) {
       }
     }
     if (selectedLanguage !== 'typescript'){
-      // Inject p5.js script tag into index.html
+      // STEP: Inject p5.js script tag into index.html
       const indexPath = path.join(targetPath, 'index.html');
       const htmlContent = await fs.readFile(indexPath, 'utf-8');
       const updatedHtml = injectP5Script(htmlContent, selectedVersion, selectedMode);
       await fs.writeFile(indexPath, updatedHtml, 'utf-8');
     }
-    // Download TypeScript definitions (skip for basic setup)
+    // STEP: Download TypeScript definitions (skip for basic setup)
     let typeDefsVersion = null;
     if (setupType === 'basic') {
       // Basic setup never includes type definitions
@@ -411,7 +411,7 @@ export async function scaffold(args) {
       }
     }
 
-    // Create .p5-config.json in project root
+    // STEP: Create .p5-config.json in project root
     const configPath = path.join(targetPath, '.p5-config.json');
     await createConfig(configPath, {
       version: selectedVersion,
@@ -421,7 +421,7 @@ export async function scaffold(args) {
       typeDefsVersion
     });
 
-    // Success summary
+    // STEP: Success summary
     display.outro(t('note.success.created'));
 
     // Build project summary
@@ -501,7 +501,7 @@ export async function scaffold(args) {
       display.message(error.stack);
     }
 
-    // Inform user about partial project directory
+    // STEP: Attempt to clean up the project directory if it was partially created
     try {
       if (await directoryExists(targetPath)) {
         display.message('');
