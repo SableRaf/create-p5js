@@ -369,8 +369,8 @@ export async function scaffold(args) {
         display.error('error.fetchVersions.failed');
         display.message(error.message);
         display.message('');
-        display.info('error.cleanup');
-        await fs.rm(targetPath, { recursive: true, force: true });
+        display.warn('error.partialProjectCreated', { path: projectPath });
+        display.info('error.manualCleanup');
         process.exit(1);
       }
     }
@@ -499,16 +499,15 @@ export async function scaffold(args) {
       display.message(error.stack);
     }
 
-    // Attempt to clean up the project directory if it was partially created
+    // Inform user about partial project directory
     try {
       if (await directoryExists(targetPath)) {
-        const cleanupSpinner = display.spinner('spinner.cleaningUp');
-        await fs.rm(targetPath, { recursive: true, force: true });
-        cleanupSpinner.stop('spinner.cleanedUp');
+        display.message('');
+        display.warn('error.partialProjectCreated', { path: projectPath });
+        display.info('error.manualCleanup');
       }
-    } catch (cleanupError) {
-      display.warn('error.cleanup');
-      display.message(cleanupError.message);
+    } catch (checkError) {
+      // Ignore errors checking directory existence
     }
 
     const helpLines = [
