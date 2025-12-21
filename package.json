@@ -1,6 +1,6 @@
 {
   "name": "create-p5js",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Scaffolding tool for p5.js projects",
   "type": "module",
   "bin": {
@@ -31,7 +31,6 @@
     "test:coverage": "vitest --coverage --run",
     "run": "node ./index.js",
     "pre-publish": "npm pack --dry-run && npm test && node scripts/check-npm-login.js"
-
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
