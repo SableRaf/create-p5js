@@ -406,7 +406,9 @@ export async function scaffold(args) {
         typeDefsVersion = null;
       }
     } else {
-      display.warn('info.skipTypes');
+      if (args.types === false){
+        display.warn('info.skipTypes');
+      }
     }
 
     // Create .p5-config.json in project root
