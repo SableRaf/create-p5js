@@ -7,6 +7,10 @@ import path from 'path';
 import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
 
 /**
+ * @typedef {import('./types.js').SetupType} SetupType
+*/
+
+/**
  * Copies all files from a template directory to a target directory.
  * Creates the target directory if it doesn't exist.
  *
@@ -266,18 +270,25 @@ export function validateP5Mode(mode) {
   return null;
 }
 
+
 /**
  * Validates setup type selections
  *
  * @param {string} type - Setup type to validate
- * @returns {string|null} Error message if invalid, null otherwise
+ * @returns {type is SetupType}
  */
 export function validateSetupType(type) {
+  return (/** @type {string[]} */(getValidSetupTypes())).includes(type);  
+}
+
+
+/**
+ * @returns {SetupType[]}
+ */
+export function getValidSetupTypes(){
+  /**@type {SetupType[]} */  
   const validTypes = ['basic', 'standard', 'custom'];
-  if (!validTypes.includes(type)) {
-    return `Invalid setup type: ${type}. Must be one of: ${validTypes.join(', ')}`;
-  }
-  return null;
+  return validTypes;
 }
 
 /**
@@ -429,7 +440,7 @@ export function determineTargetPath(cwdPath, projectPath){
 /** Return path.win32 or path.posix by guessing based on the given array of example path strings. 
  * This is a guess but is only for use when unit testing.
  * @param {string[]} examplePaths
- * @returns {path.PlatformPath}
+ * @returns {typeof path.win32 | typeof path.posix}
  */
 function getOSPlatformPathModuleBasedOnExamples(examplePaths){
  return examplePaths.some(p => p.includes('\\') || p.includes(':'))
