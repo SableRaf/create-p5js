@@ -1,6 +1,6 @@
 {
   "name": "create-p5js",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Scaffolding tool for p5.js projects",
   "type": "module",
   "bin": {
