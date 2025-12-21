@@ -29,3 +29,8 @@ Warning: This may well be out of date - last revised from scaffold.js on 2025-12
     showSummaryAndNextSteps --> cleanUp[Clean up]
     cleanUp --> exit2[Exit]
 ```
+
+## resources
+
+ * [Mermaid Flowchart Diagram Syntax](https://docs.mermaidchart.com/mermaid/flowchart/syntax)
+ * [Live editor](https://mermaid.live/edit)

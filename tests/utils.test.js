@@ -62,8 +62,8 @@ describe('utils validations', () => {
   it('getTemplateName creates correct template directory names', () => {
     expect(getTemplateName('javascript', 'global')).toBe('basic-global-js');
     expect(getTemplateName('javascript', 'instance')).toBe('basic-instance-js');
-    expect(getTemplateName('typescript', 'global')).toBe('basic-global-ts');
-    expect(getTemplateName('typescript', 'instance')).toBe('basic-instance-ts');
+    expect(getTemplateName('typescript', 'global')).toBe('basic-ts');
+    expect(getTemplateName('typescript', 'instance')).toBe('basic-ts');
   });
 
   it('validateMode accepts cdn and local', () => {

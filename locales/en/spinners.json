@@ -19,8 +19,5 @@
 
   "spinner.downloadingTypes": "Downloading TypeScript definitions...",
   "spinner.downloadedTypes": "TypeScript definitions downloaded (v{version})",
-  "spinner.failedTypes": "Failed to download TypeScript definitions",
-
-  "spinner.cleaningUp": "Cleaning up incomplete project directory",
-  "spinner.cleanedUp": "✓ Cleaned up incomplete project"
+  "spinner.failedTypes": "Failed to download TypeScript definitions"
 }

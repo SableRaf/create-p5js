@@ -154,9 +154,9 @@ describe('display silent mode behavior', () => {
       '✓ Fetched available p5.js versions'
     );
 
-    activeSpinner.stop('spinner.cleanedUp');
+    activeSpinner.stop('spinner.copiedTemplate');
     expect(instance.__stopMock).toHaveBeenCalledWith(
-      '✓ Cleaned up incomplete project'
+      '✓ Copied template files'
     );
   });
 });
