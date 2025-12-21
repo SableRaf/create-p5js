@@ -353,7 +353,7 @@ export async function scaffold(args) {
     }
 
     // If local mode, create lib directory and download p5.js files
-    if (selectedMode === 'local') {
+    if (selectedMode === 'local'  && selectedLanguage !== 'typescript') {
       const libPath = path.join(targetPath, 'lib');
       await fs.mkdir(libPath, { recursive: true });
       try {
@@ -374,19 +374,19 @@ export async function scaffold(args) {
         process.exit(1);
       }
     }
-
-    // Inject p5.js script tag into index.html
-    const indexPath = path.join(targetPath, 'index.html');
-    const htmlContent = await fs.readFile(indexPath, 'utf-8');
-    const updatedHtml = injectP5Script(htmlContent, selectedVersion, selectedMode);
-    await fs.writeFile(indexPath, updatedHtml, 'utf-8');
-
+    if (selectedLanguage !== 'typescript'){
+      // Inject p5.js script tag into index.html
+      const indexPath = path.join(targetPath, 'index.html');
+      const htmlContent = await fs.readFile(indexPath, 'utf-8');
+      const updatedHtml = injectP5Script(htmlContent, selectedVersion, selectedMode);
+      await fs.writeFile(indexPath, updatedHtml, 'utf-8');
+    }
     // Download TypeScript definitions (skip for basic setup)
     let typeDefsVersion = null;
     if (setupType === 'basic') {
       // Basic setup never includes type definitions
       display.info('info.skipTypesBasic');
-    } else if (args.types !== false) {
+    } else if (args.types !== false && selectedLanguage !== 'typescript') {
       const typesPath = path.join(targetPath, 'types');
       await fs.mkdir(typesPath, { recursive: true });
       try {
