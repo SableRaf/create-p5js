@@ -282,13 +282,16 @@ export function validateSetupType(type) {
 
 /**
  * Determines template directory name from language and mode
- * @param {string} language - 'javascript' or 'typescript'
- * @param {string} mode - 'global' or 'instance'
+ * @param {'javascript' | 'typescript'} language
+ * @param {'global' | 'instance'} mode 
  * @returns {string} Template directory name (e.g., 'basic-global-js')
  */
 export function getTemplateName(language, mode) {
-  const langSuffix = language === 'typescript' ? 'ts' : 'js';
-  return `basic-${mode}-${langSuffix}`;
+  if (language === 'typescript'){
+    return 'basic-ts';
+  }
+  
+  return `basic-${mode}-js`;
 }
 
 /**
