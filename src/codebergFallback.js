@@ -1,3 +1,4 @@
+//@ts-nocheck TODO: have this file also typecheck.  For now focus is on scaffold
 import https from 'https';
 import { promises as fs, createWriteStream } from 'fs';
 import { createGunzip } from 'zlib';

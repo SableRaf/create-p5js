@@ -1,6 +1,7 @@
 import degit from 'degit';
 import { parseGitHubSpec, isSingleFile, downloadSingleFile, downloadGitHubArchive } from './githubFallback.js';
 import { parseCodebergSpec, downloadCodebergArchive, downloadCodebergSingleFile } from './codebergFallback.js';
+import { hasMessageStringProperty } from './exceptionUtils.js';
 
 /**
  * Detect whether the provided template spec refers to a remote template
@@ -224,7 +225,9 @@ export async function fetchTemplate(templateSpec, targetPath, options = {}) {
       await downloadGitHubArchive(user, repo, ref, subpath, targetPath);
     } catch (fallbackError) {
       // If fallback also fails, throw the original degit error for better context
-      throw new Error(`${degitError.message} (fallback also failed: ${fallbackError.message})`);
+      const degitMsg = hasMessageStringProperty(degitError) ? degitError.message : "unknown";
+      const fallbackMsg = hasMessageStringProperty(fallbackError) ? fallbackError.message : "unknown";
+      throw new Error(`${degitMsg} (fallback also failed: ${fallbackMsg})`);
     }
   }
 }

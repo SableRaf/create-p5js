@@ -60,11 +60,13 @@ export function intro() {
  *
  * @param {string} message - The outro message (already translated)
  * @param {number} [exitCode=0] - Exit code to use when terminating
+ * @returns {never}
  */
 export function outro(message, exitCode = 0) {
   if (shouldSuppress('outro')) {
-    process.exit(exitCode);
-    return;
+    process.exit(exitCode);    
+    // @ts-ignore
+    return; //defensive in case process.exit is stubbed
   }
   p.outro(message);
   process.exit(exitCode);
@@ -73,11 +75,13 @@ export function outro(message, exitCode = 0) {
 /**
  * Show cancellation message and exit
  * @param {string} key - Translation key for cancellation message
+ * @returns {never}
  */
 export function cancel(key) {
   if (shouldSuppress('cancel')) {
     process.exit(0);
-    return;
+    //@ts-ignore
+    return; //defensive in case process.exit is stubbed
   }
   p.cancel(t(key));
   process.exit(0);
@@ -152,10 +156,15 @@ export function note(lineKeys, titleKey, vars = {}) {
 }
 
 /**
+ * @typedef {object} SpinnerControl
+ * @property {function(string, Record<string, any>=): void} message
+ * @property {function(string, Record<string, any>=): void} stop
+ */
+/**
  * Create and manage a spinner
  * @param {string} key - Translation key for initial message
  * @param {Record<string, any>} [vars] - Variables for interpolation
- * @returns {Object} Spinner object with message(key, vars) and stop(key, vars) methods
+ * @returns {SpinnerControl}  Spinner object with message(key, vars) and stop(key, vars) methods, for managing the control's lifecycle.
  */
 export function spinner(key, vars) {
   if (shouldSuppress('spinner')) {
@@ -171,9 +180,12 @@ export function spinner(key, vars) {
   const originalMessage = s.message.bind(s);
   const originalStop = s.stop.bind(s);
 
+  //@ts-ignore not dealing with this for now
   s.message = (key, vars) => originalMessage(t(key, vars));
+  //@ts-ignore not dealing with this for now
   s.stop = (key, vars) => originalStop(t(key, vars));
-
+  
+  //@ts-ignore not dealing with this for now
   return s;
 }
 

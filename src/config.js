@@ -5,6 +5,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { readJSON, writeJSON, fileExists } from './utils.js';
+import { hasMessageStringProperty } from './exceptionUtils.js';
 
 /**
  * Creates a new .p5-config.json file with project metadata
@@ -80,9 +81,10 @@ export async function migrateConfigIfNeeded(projectDir) {
     await fs.rename(oldConfigPath, newConfigPath);
     return { migrated: true, error: null };
   } catch (err) {
+    const msg = hasMessageStringProperty(err)?err.message : "unknown"
     return {
       migrated: false,
-      error: `error.migration.renameFailed: ${err.message}`
+      error: `error.migration.renameFailed: ${msg}`
     };
   }
 }

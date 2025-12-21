@@ -1,3 +1,4 @@
+//@ts-nocheck TODO: have this file also typecheck.  For now focus is on scaffold
 import { writeFile } from './utils.js';
 import { t } from './i18n/index.js';
 
@@ -155,9 +156,9 @@ export async function downloadP5Files(version, targetDir, spinner = null) {
  * For global-mode sketches, downloads both global.d.ts and main definition file.
  * @param {string} p5Version - The p5.js version to download type definitions for
  * @param {string} targetDir - The directory path where type definitions should be saved
- * @param {Object} [spinner] - Optional spinner object with stop() method for progress feedback
- * @param {string} [template] - The template being used ('instance', 'basic', 'typescript', 'empty')
- * @param {string} [previousVersion] - Optional previous p5.js version (for detecting major version changes)
+ * @param {Object|null} spinner - Optional spinner object with stop() method for progress feedback
+ * @param {string|null} template - The template being used ('instance', 'basic', 'typescript', 'empty')
+ * @param {string|null} previousVersion - Optional previous p5.js version (for detecting major version changes)
  * @returns {Promise<string>} The actual types version used
  * @throws {Error} If download fails
  */
@@ -176,7 +177,7 @@ export async function downloadTypeDefinitions(p5Version, targetDir, spinner = nu
 
       if (isDowngrading) {
         // Clear the types folder when downgrading from 2.x to 1.x
-        const { removeDirectory } = await import('./utils.js');
+        const { removeDirectory } = await import('./utils.js');        
         await removeDirectory(targetDir);
 
         // Recreate the directory

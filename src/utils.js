@@ -6,9 +6,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
 
-/**
- * @typedef {import('./types.js').SetupType} SetupType
-*/
+/** @typedef {import('./types.js').SetupType} SetupType */
 
 /**
  * Copies all files from a template directory to a target directory.
@@ -328,6 +326,7 @@ export function validateVersion(version, availableVersions, latest) {
  */
 export function generateProjectName() {
   const useColor = Math.random() < 0.5;
+  /** @type {import('unique-names-generator').Config} */
   const config = {
     dictionaries: useColor ? [colors, animals] : [adjectives, animals],
     separator: '-',

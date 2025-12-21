@@ -1,14 +1,23 @@
+
 import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-
+/**
+ * 
+ * @param {string} command 
+ * @returns {string} the stdout from the command
+ */
 function runCommand(command) {
   return execSync(command, {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe']
   }).trim();
 }
-
+/**
+ * 
+ * @param {string} packageName 
+ * @returns {string[]} 
+ */
 function getMaintainerUsernames(packageName) {
   const output = runCommand(`npm view ${packageName} maintainers --json`);
   if (!output) {
@@ -50,7 +59,11 @@ function getPackageName() {
   const packageJson = JSON.parse(readFileSync(packagePath, 'utf8'));
   return packageJson.name;
 }
-
+/**
+ * 
+ * @param {string} message 
+ * @returns {never}
+ */
 function failLogin(message) {
   console.error(`\x1b[31m✖ ${message}\x1b[0m`);
   console.warn(`\x1b[33m⚠ You need to log in to npm: \`npm login\`\x1b[0m`);
@@ -70,6 +83,7 @@ if (!looksLikeUsername) {
 }
 
 const packageName = getPackageName();
+/** @type {string[]} */
 let maintainers = [];
 try {
   maintainers = getMaintainerUsernames(packageName);

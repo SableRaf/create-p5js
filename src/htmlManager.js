@@ -1,3 +1,4 @@
+//@ts-nocheck TODO: have this file also typecheck.  For now focus is on scaffold
 import { parseHTML } from 'linkedom';
 
 const P5_PATTERNS = [

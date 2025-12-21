@@ -8,24 +8,11 @@ import * as p from '@clack/prompts';
 import { t } from '../i18n/index.js';
 import { isValidPathName } from '../utils.js';
 
-
-/**
- * @typedef {import('../types.js').Language} Language
-*/
-
-/**
- * @typedef {import('../types.js').CliArgs} CliArgs
-*/
-
-/**
- * @typedef {import('../types.js').P5Mode} P5Mode
-*/
-/**
- * @typedef {import('../types.js').DeliveryMode} DeliveryMode
-*/
-/**
- * @typedef {import('../types.js').SetupType} SetupType
-*/
+/** @typedef {import('../types.js').CliArgs} CliArgs */
+/** @typedef {import('../types.js').DeliveryMode} DeliveryMode */
+/** @typedef {import('../types.js').Language} Language */
+/** @typedef {import('../types.js').P5Mode} P5Mode */
+/** @typedef {import('../types.js').SetupType} SetupType */
 
 /**
  * Check if user cancelled a prompt

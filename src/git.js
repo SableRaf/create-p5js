@@ -34,7 +34,7 @@ export async function initGit(projectDir) {
   }
 
   // Run git init
-  await new Promise((resolve, reject) => {
+  await /** @type {Promise<void>} */(new Promise((resolve, reject) => {
     const git = spawn('git', ['init'], { cwd: projectDir });
 
     git.on('error', (error) => {
@@ -48,7 +48,7 @@ export async function initGit(projectDir) {
         reject(new Error(`git init exited with code ${code}`));
       }
     });
-  });
+  }));
 
   // Create .gitignore file
   await createGitignore(projectDir);

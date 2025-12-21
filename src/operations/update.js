@@ -1,3 +1,5 @@
+//@ts-nocheck TODO: eventually have this type-check, too! changing scaffold only for now
+
 /**
  * Update module - Handles version updates and mode switching for existing p5.js projects
  * Philosophy: Business logic only, NO inline copy
