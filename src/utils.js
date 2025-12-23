@@ -54,6 +54,22 @@ export async function createDirectory(dirPath) {
 export async function copyFile(source, dest) {
   await fs.copyFile(source, dest);
 }
+/**
+ * Rename/move a single file from source to destination
+ * @param {string} sourcePath
+ * @param {string} destPath
+ */
+export async function renameFile(sourcePath, destPath) {
+  await fs.rename(sourcePath, destPath);
+}
+
+/**
+ * Delete file at given path
+ * @param {string} targetFilePath
+ */
+export async function deleteFile(targetFilePath) {
+  await fs.unlink(targetFilePath);
+}
 
 /**
  * Check if a file or directory exists

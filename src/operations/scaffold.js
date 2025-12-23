@@ -16,7 +16,7 @@ import * as display from '../ui/display.js';
 import * as prompts from '../ui/prompts.js';
 
 // Business utilities
-import { copyTemplateFiles, determineTargetPath, validateProjectName, directoryExists, validateMode, validateVersion, validateLanguage, validateP5Mode, validateSetupType, getTemplateName, generateProjectName, isRemoteTemplateSpec } from '../utils.js';
+import { copyTemplateFiles, determineTargetPath, validateProjectName, directoryExists, validateMode, validateVersion, validateLanguage, validateP5Mode, validateSetupType, getTemplateName, generateProjectName, isRemoteTemplateSpec, renameFile, deleteFile } from '../utils.js';
 import { fetchVersions, downloadP5Files, downloadTypeDefinitions } from '../version.js';
 import { injectP5Script } from '../htmlManager.js';
 import { createConfig } from '../config.js';
@@ -380,6 +380,24 @@ export async function scaffold(args) {
       const htmlContent = await fs.readFile(indexPath, 'utf-8');
       const updatedHtml = injectP5Script(htmlContent, selectedVersion, selectedDeliveryMode);
       await fs.writeFile(indexPath, updatedHtml, 'utf-8');
+    }
+    //STEP: set up basic-ts typescript template for selected p5Mode (global / instance)
+    if (selectedLanguage === 'typescript'){
+      //Within the newly created project folder...
+      //  rename either sketchGlobalMode.ts or sketchInstanceMode.ts to sketch.ts
+      //  delete the other
+      const targetSketchName = "sketch.ts"
+      const globalModeSourceSketch = "sketchGlobalMode.ts"
+      const instanceModeSourceSketch = "sketchInstanceMode.ts"
+      
+      const [sourceSketchName, unusedSketchName] = selectedP5Mode === "global" ? 
+      [globalModeSourceSketch, instanceModeSourceSketch] : 
+      [instanceModeSourceSketch, globalModeSourceSketch]
+      
+      renameFile(path.join(targetPath, "src", sourceSketchName), 
+                 path.join(targetPath, "src", targetSketchName));
+                 
+      deleteFile(path.join(targetPath, "src", unusedSketchName))
     }
     // STEP: Download TypeScript definitions (skip for basic setup)
     let typeDefsVersion = null;

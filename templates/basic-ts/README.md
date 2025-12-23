@@ -15,16 +15,6 @@ npm i
 npm run dev
 ```
 
-### Choose global-mode or instance-mode p5.js
-
-Two sketches are provided in src, one for each mode.
-
-If you're not sure, use global mode.
-
-Delete whichever of the two you don't need - this is important for correct type-checking operation.
-
-Ensure index.html is pointing at the right one.
-
 ### (optional) Type-check ALL your files
 
 You can type-check _all_ your files from the command-line, with:
