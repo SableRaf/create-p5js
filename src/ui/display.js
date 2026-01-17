@@ -7,15 +7,7 @@
 import * as p from '@clack/prompts';
 import { blue, red, green, cyan, bgMagenta, white, gray } from 'kolorist';
 import { t } from '../i18n/index.js';
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const packageJson = JSON.parse(
-  readFileSync(join(__dirname, '../../package.json'), 'utf-8')
-);
-const VERSION = packageJson.version;
+import { VERSION } from '../version.js';
 
 let silentModeEnabled = false;
 

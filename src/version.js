@@ -1,5 +1,10 @@
-import { writeFile } from './utils.js';
+import { writeFile, getPackageVersion } from './utils.js';
 import { t } from './i18n/index.js';
+
+/**
+ * The current version of create-p5 CLI tool from package.json
+ */
+export const VERSION = getPackageVersion();
 
 /**
  * Checks if a version string is a stable release (semver compliant: X.Y.Z)

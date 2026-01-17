@@ -12,6 +12,7 @@ import { update } from './src/operations/update.js';
 import { configExists, migrateConfigIfNeeded } from './src/config.js';
 import { t } from './src/i18n/index.js';
 import * as display from './src/ui/display.js';
+import { VERSION } from './src/version.js';
 
 async function main() {
   // Parse command line arguments
@@ -33,6 +34,12 @@ async function main() {
   if (args.silent) {
     args.yes = true;
     display.setSilentMode(true);
+  }
+
+  // Handle --version flag (when used without a value)
+  if (args.version === true || (args.version === '' && !args._.length)) {
+    console.log(VERSION);
+    process.exit(0);
   }
 
   // Handle --help flag
