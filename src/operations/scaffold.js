@@ -519,7 +519,7 @@ export async function scaffold(args) {
       display.message(error.stack);
     }
 
-    // STEP: Attempt to clean up the project directory if it was partially created
+    // STEP: Warn user that partial project may have been created and suggest manual cleanup
     try {
       if (await directoryExists(targetPath)) {
         display.message('');
