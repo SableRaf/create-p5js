@@ -5,8 +5,9 @@
  */
 
 import * as p from '@clack/prompts';
-import { blue, red, green, cyan, bgMagenta, white } from 'kolorist';
+import { blue, red, green, cyan, bgMagenta, white, gray } from 'kolorist';
 import { t } from '../i18n/index.js';
+import { VERSION } from '../version.js';
 
 let silentModeEnabled = false;
 
@@ -52,7 +53,7 @@ export function intro() {
   if (shouldSuppress('intro')) {
     return;
   }
-  p.intro(bgMagenta(white(t('cli.intro'))));
+  p.intro(bgMagenta(white(t('cli.intro'))) + ' ' + gray(`v${VERSION}`));
 }
 
 /**

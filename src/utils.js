@@ -3,7 +3,10 @@
  */
 
 import fs from 'fs/promises';
+import { readFileSync } from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
 
 /**
@@ -445,13 +448,27 @@ export function determineTargetPath(cwdPath, projectPath){
   return platformPath.join(cwdPath, projectPath);
 }
 
-/** Return path.win32 or path.posix by guessing based on the given array of example path strings. 
+/** Return path.win32 or path.posix by guessing based on the given array of example path strings.
  * This is a guess but is only for use when unit testing.
  * @param {string[]} examplePaths
  * @returns {path.PlatformPath}
  */
 function getOSPlatformPathModuleBasedOnExamples(examplePaths){
  return examplePaths.some(p => p.includes('\\') || p.includes(':'))
-    ? path.win32 
+    ? path.win32
     : path.posix;
+}
+
+/**
+ * Reads and returns the version from package.json
+ * @returns {string} The current version of create-p5 CLI tool
+ */
+export function getPackageVersion() {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  const packageJson = JSON.parse(
+    readFileSync(join(__dirname, '../package.json'), 'utf-8')
+  );
+
+  return packageJson.version;
 }
